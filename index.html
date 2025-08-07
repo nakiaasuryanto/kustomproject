@@ -77,10 +77,15 @@
                         <div class="space-y-4">
                             <input type="date" id="salesDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             
-                            <select id="salesProduct" name="product" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select Product</option>
-                                <!-- Products will be loaded from database -->
-                            </select>
+                            <div class="searchable-dropdown">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Product</label>
+                                <input type="text" id="salesProduct" name="product" placeholder="Type or select product" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <div class="dropdown-options" id="productDropdown">
+                                    <!-- Products will be loaded here -->
+                                </div>
+                                <input type="hidden" id="salesProductId">
+                                <input type="hidden" id="salesProductPrice">
+                            </div>
 
                             <!-- Product Color and Size -->
                             <div class="grid grid-cols-2 gap-3">
@@ -466,7 +471,7 @@
             document.getElementById('resetRecentFilters').addEventListener('click', resetRecentFilters);
             
             // Product selection handler for auto-fill price
-            document.getElementById('salesProduct').addEventListener('change', handleProductSelection);
+            document.getElementById('salesProduct').addEventListener('input', handleProductSelection);
         }
 
         function handlePICSelection() {
@@ -501,35 +506,43 @@
                 const response = await fetch('http://localhost:3001/api/products');
                 const products = await response.json();
                 
-                const productSelect = document.getElementById('salesProduct');
+                const productDropdown = document.getElementById('productDropdown');
                 
-                // Clear existing options (except the first "Select Product" option)
-                productSelect.innerHTML = '<option value="">Select Product</option>';
+                // Clear existing options
+                productDropdown.innerHTML = '';
                 
                 // Add products from database
                 products.forEach(product => {
-                    const option = document.createElement('option');
-                    option.value = product.name;
+                    const option = document.createElement('div');
+                    option.className = 'dropdown-option';
+                    option.dataset.value = product.name;
                     option.dataset.id = product.id;
                     option.dataset.price = product.price;
                     option.textContent = product.name; // Show only product name
-                    productSelect.appendChild(option);
+                    productDropdown.appendChild(option);
                 });
                 
                 console.log(`✅ Loaded ${products.length} products from database`);
             } catch (error) {
                 console.error('Error loading products:', error);
                 // Fallback: show error message
-                const productSelect = document.getElementById('salesProduct');
-                productSelect.innerHTML = '<option value="">Error loading products</option>';
+                const productDropdown = document.getElementById('productDropdown');
+                productDropdown.innerHTML = '<div class="dropdown-option">Error loading products</div>';
             }
         }
 
         function handleProductSelection() {
-            const productSelect = document.getElementById('salesProduct');
-            const selectedOption = productSelect.selectedOptions[0];
+            const productInput = document.getElementById('salesProduct');
+            const productIdInput = document.getElementById('salesProductId');
+            const productPriceInput = document.getElementById('salesProductPrice');
             
+            const productDropdown = document.getElementById('productDropdown');
+            const selectedOption = Array.from(productDropdown.children).find(option => option.dataset.value === productInput.value);
+
             if (selectedOption && selectedOption.dataset.price) {
+                productIdInput.value = selectedOption.dataset.id;
+                productPriceInput.value = selectedOption.dataset.price;
+
                 const price = parseInt(selectedOption.dataset.price);
                 
                 // Auto-fill price based on promo type
@@ -934,6 +947,9 @@ if (promoType === 'No Promo') {
                         pic: document.getElementById('expensePIC').value || null
                     };
                 }
+
+                // Save to local storage
+                saveTransactionLocally(transactionData);
                 
                 const response = await fetch('http://localhost:3001/api/transactions', {
                     method: 'POST',
@@ -963,7 +979,8 @@ if (promoType === 'No Promo') {
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showNotification('Network error occurred', 'error');
+                showNotification('Network error occurred. Transaction saved locally.', 'error');
+                loadLocalTransactions();
             }
             
             // Re-enable submit button
@@ -1078,6 +1095,19 @@ if (promoType === 'No Promo') {
         // Recent transaction filter functions
         let allRecentTransactions = [];
 
+        function saveTransactionLocally(transaction) {
+            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            transactions.push(transaction);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        function loadLocalTransactions() {
+            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            allRecentTransactions = transactions;
+            populateRecentPICFilter();
+            applyRecentFilters();
+        }
+
         async function loadAndFilterRecentTransactions() {
             try {
                 showRecentLoading();
@@ -1094,6 +1124,7 @@ if (promoType === 'No Promo') {
             } catch (error) {
                 console.error('Error loading recent transactions:', error);
                 showRecentError();
+                loadLocalTransactions();
             }
         }
 
