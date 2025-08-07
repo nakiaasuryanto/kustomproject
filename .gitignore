@@ -1,0 +1,18 @@
+
+# Dependencies
+/node_modules
+/server/node_modules
+
+# IDEs
+.vscode
+.idea
+.claude
+
+# Environment Variables
+.env
+/server/.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
