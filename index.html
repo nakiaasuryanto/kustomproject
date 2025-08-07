@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kustomproject - Finance Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .searchable-dropdown {
+            position: relative;
+        }
+        .dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .dropdown-options.show {
+            display: block;
+        }
+        .dropdown-option {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .dropdown-option:hover {
+            background-color: #f3f4f6;
+        }
+        .dropdown-option:last-child {
+            border-bottom: none;
+        }
+        .dropdown-option.highlighted {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Kustomproject</h1>
+            <p class="text-gray-600">Internal Finance Management Tool</p>
+            <div class="mt-4 space-x-3">
+                <a href="dashboard.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    📊 Dashboard
+                </a>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Form Section (Left) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Add Transaction</h2>
+                
+                <!-- Transaction Type Selector -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Transaction Type</label>
+                    <select id="transactionType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50">
+                        <option value="penjualan">Penjualan (Sales)</option>
+                        <option value="pengeluaran">Pengeluaran (Expense)</option>
+                    </select>
+                </div>
+
+                <form id="transactionForm" class="space-y-4">
+                    <!-- Sales Form -->
+                    <div id="salesForm">
+                        <div class="space-y-4">
+                            <input type="date" id="salesDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            
+                            <select id="salesProduct" name="product" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Product</option>
+                                <!-- Products will be loaded from database -->
+                            </select>
+
+                            <!-- Product Color and Size -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="searchable-dropdown">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                                    <input type="text" id="productColor" name="color" placeholder="Type or select color" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <div class="dropdown-options" id="colorDropdown">
+                                        <div class="dropdown-option" data-value="Black">Black</div>
+                                        <div class="dropdown-option" data-value="White">White</div>
+                                        <div class="dropdown-option" data-value="Navy Blue">Navy Blue</div>
+                                        <div class="dropdown-option" data-value="Sky Blue">Sky Blue</div>
+                                        <div class="dropdown-option" data-value="Midnight Blue">Midnight Blue</div>
+                                        <div class="dropdown-option" data-value="Royal Blue">Royal Blue</div>
+                                        <div class="dropdown-option" data-value="Red">Red</div>
+                                        <div class="dropdown-option" data-value="Maroon">Maroon</div>
+                                        <div class="dropdown-option" data-value="Dark Red">Dark Red</div>
+                                        <div class="dropdown-option" data-value="Green">Green</div>
+                                        <div class="dropdown-option" data-value="Forest Green">Forest Green</div>
+                                        <div class="dropdown-option" data-value="Olive Green">Olive Green</div>
+                                        <div class="dropdown-option" data-value="Yellow">Yellow</div>
+                                        <div class="dropdown-option" data-value="Orange">Orange</div>
+                                        <div class="dropdown-option" data-value="Purple">Purple</div>
+                                        <div class="dropdown-option" data-value="Pink">Pink</div>
+                                        <div class="dropdown-option" data-value="Gray">Gray</div>
+                                        <div class="dropdown-option" data-value="Light Gray">Light Gray</div>
+                                        <div class="dropdown-option" data-value="Dark Gray">Dark Gray</div>
+                                        <div class="dropdown-option" data-value="Brown">Brown</div>
+                                        <div class="dropdown-option" data-value="Cream">Cream</div>
+                                        <div class="dropdown-option" data-value="Beige">Beige</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="searchable-dropdown">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Size</label>
+                                    <input type="text" id="productSize" name="size" placeholder="Type or select size" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <div class="dropdown-options" id="sizeDropdown">
+                                        <div class="dropdown-option" data-value="XS">XS</div>
+                                        <div class="dropdown-option" data-value="S">S</div>
+                                        <div class="dropdown-option" data-value="M">M</div>
+                                        <div class="dropdown-option" data-value="L">L</div>
+                                        <div class="dropdown-option" data-value="XL">XL</div>
+                                        <div class="dropdown-option" data-value="XXL">XXL</div>
+                                        <div class="dropdown-option" data-value="XXXL">XXXL</div>
+                                        <div class="dropdown-option" data-value="All Size">All Size</div>
+                                        <div class="dropdown-option" data-value="Kids S">Kids S</div>
+                                        <div class="dropdown-option" data-value="Kids M">Kids M</div>
+                                        <div class="dropdown-option" data-value="Kids L">Kids L</div>
+                                        <div class="dropdown-option" data-value="Kids XL">Kids XL</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <select id="salesPromo" name="promo_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Promo</option>
+                                <option value="No Promo">No Promo</option>
+                                <option value="B1G1">B1G1</option>
+                                <option value="Bundling">Bundling</option>
+                                <option value="Family Set">Family Set</option>
+                                <option value="Random Set">Random Set</option>
+                                <option value="Scrunchie Set">Scrunchie Set</option>
+                                <option value="2pcs Sablon">2pcs Sablon</option>
+                            </select>
+
+                            <!-- Enhanced Promo Fields -->
+                            <div id="noPromoFields" class="hidden space-y-4">
+                                <input type="number" id="quantitySimple" placeholder="Quantity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="number" id="priceSimple" placeholder="Price per pcs" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div id="promoFields" class="hidden space-y-4">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                                            <span id="promoQtyLabel">Quantity</span>
+                                        </label>
+                                        <input type="number" id="quantityPromo" placeholder="Quantity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                            <span id="promoPriceLabel">Fixed Price</span>
+                                            <span class="ml-1 text-xs text-gray-500">(editable)</span>
+                                        </label>
+                                        <input type="number" id="pricePromo" placeholder="10000" value="10000" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price Breakdown Form -->
+                            <div id="priceBreakdown" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                                <h4 class="font-semibold text-blue-800 text-sm">💰 Price Breakdown</h4>
+                                
+                                <div id="normalBreakdown" class="hidden">
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-gray-600">Normal Items:</span>
+                                        <div class="text-right">
+                                            <div><span id="normalQtyDisplay">0</span> × Rp <span id="normalPriceDisplay">0</span></div>
+                                            <div class="font-medium">= Rp <span id="normalTotalDisplay">0</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="promoBreakdown" class="hidden">
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-gray-600">Promo Items:</span>
+                                        <div class="text-right">
+                                            <div><span id="promoQtyDisplay">0</span> × Rp <span id="promoPriceDisplay">0</span></div>
+                                            <div class="font-medium text-green-600">= Rp <span id="promoTotalDisplay">0</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border-t border-blue-300 pt-2">
+                                    <div class="flex justify-between items-center text-sm font-semibold">
+                                        <span class="text-blue-800">Subtotal:</span>
+                                        <span class="text-blue-800">Rp <span id="subtotalDisplay">0</span></span>
+                                    </div>
+                                    <div class="flex justify-between items-center font-bold text-blue-800 border-t border-blue-300 pt-1 mt-1">
+                                        <span>Total:</span>
+                                        <span>Rp <span id="grandTotalDisplay">0</span></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <select id="salesPayment" name="payment_method" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Payment Method</option>
+                                <option value="CASH">CASH</option>
+                                <option value="Mandiri">Mandiri</option>
+                            </select>
+
+                            <div class="space-y-2">
+                                <select id="salesPIC" name="pic_sales" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select PIC</option>
+                                    <option value="Ayu">Ayu</option>
+                                    <option value="Fifin">Fifin</option>
+                                    <option value="Lili">Lili</option>
+                                    <option value="Nadira">Nadira</option>
+                                    <option value="Rizka">Rizka</option>
+                                    <option value="custom">➕ Add New PIC</option>
+                                </select>
+                                <input type="text" id="customSalesPIC" name="custom_pic_sales" placeholder="Enter new PIC name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hidden">
+                            </div>
+
+                            <!-- Multiple Free Items -->
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-sm font-medium text-gray-700">Free Items (optional)</label>
+                                    <button type="button" id="addFreeItemBtn" class="text-blue-600 hover:text-blue-700 text-sm">
+                                        ➕ Add Item
+                                    </button>
+                                </div>
+                                <div id="freeItemsContainer" class="space-y-3">
+                                    <div class="free-item-row border border-gray-200 rounded-lg p-3 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm font-medium text-gray-700">Free Item 1</span>
+                                            <button type="button" class="remove-free-item text-red-500 hover:text-red-700 px-2 py-1" onclick="removeFreeItem(this)" style="display: none;">❌</button>
+                                        </div>
+                                        <select id="salesProduct" name="product" class="free-item-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="">Select Product</option>
+                                        </select>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div class="searchable-dropdown">
+                                                <input type="text" class="free-item-color w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
+                                                <div class="dropdown-options free-color-dropdown">
+                                                    <div class="dropdown-option" data-value="Black">Black</div>
+                                                    <div class="dropdown-option" data-value="White">White</div>
+                                                    <div class="dropdown-option" data-value="Navy Blue">Navy Blue</div>
+                                                    <div class="dropdown-option" data-value="Sky Blue">Sky Blue</div>
+                                                    <div class="dropdown-option" data-value="Midnight Blue">Midnight Blue</div>
+                                                    <div class="dropdown-option" data-value="Royal Blue">Royal Blue</div>
+                                                    <div class="dropdown-option" data-value="Red">Red</div>
+                                                    <div class="dropdown-option" data-value="Maroon">Maroon</div>
+                                                    <div class="dropdown-option" data-value="Dark Red">Dark Red</div>
+                                                    <div class="dropdown-option" data-value="Green">Green</div>
+                                                    <div class="dropdown-option" data-value="Forest Green">Forest Green</div>
+                                                    <div class="dropdown-option" data-value="Olive Green">Olive Green</div>
+                                                    <div class="dropdown-option" data-value="Yellow">Yellow</div>
+                                                    <div class="dropdown-option" data-value="Orange">Orange</div>
+                                                    <div class="dropdown-option" data-value="Purple">Purple</div>
+                                                    <div class="dropdown-option" data-value="Pink">Pink</div>
+                                                    <div class="dropdown-option" data-value="Gray">Gray</div>
+                                                    <div class="dropdown-option" data-value="Light Gray">Light Gray</div>
+                                                    <div class="dropdown-option" data-value="Dark Gray">Dark Gray</div>
+                                                    <div class="dropdown-option" data-value="Brown">Brown</div>
+                                                    <div class="dropdown-option" data-value="Cream">Cream</div>
+                                                    <div class="dropdown-option" data-value="Beige">Beige</div>
+                                                </div>
+                                            </div>
+                                            <div class="searchable-dropdown">
+                                                <input type="text" class="free-item-size w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
+                                                <div class="dropdown-options free-size-dropdown">
+                                                    <div class="dropdown-option" data-value="XS">XS</div>
+                                                    <div class="dropdown-option" data-value="S">S</div>
+                                                    <div class="dropdown-option" data-value="M">M</div>
+                                                    <div class="dropdown-option" data-value="L">L</div>
+                                                    <div class="dropdown-option" data-value="XL">XL</div>
+                                                    <div class="dropdown-option" data-value="XXL">XXL</div>
+                                                    <div class="dropdown-option" data-value="XXXL">XXXL</div>
+                                                    <div class="dropdown-option" data-value="All Size">All Size</div>
+                                                    <div class="dropdown-option" data-value="Kids S">Kids S</div>
+                                                    <div class="dropdown-option" data-value="Kids M">Kids M</div>
+                                                    <div class="dropdown-option" data-value="Kids L">Kids L</div>
+                                                    <div class="dropdown-option" data-value="Kids XL">Kids XL</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Calculation -->
+                            <div id="salesCalculation" class="bg-gray-50 p-4 rounded-md hidden">
+                                <div class="flex justify-between mb-2">
+                                    <span>Total:</span>
+                                    <strong id="salesTotal">Rp 0</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expense Form -->
+                    <div id="expenseForm" class="hidden">
+                        <div class="space-y-4">
+                            <input type="date" id="expenseDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                            <select id="expenseCategory" name="expense_category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Category</option>
+                                <option value="Produksi">Produksi</option>
+                                <option value="Operasional">Operasional</option>
+                                <option value="Fee Tambahan">Fee Tambahan</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+
+                            <input type="text" id="expenseDescription" name="description" placeholder="Description" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                            <input type="number" id="expenseAmount" name="amount" placeholder="Amount" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                            <select id="expensePayment" name="payment_method" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Payment Method</option>
+                                <option value="CASH">CASH</option>
+                                <option value="TF">TF</option>
+                            </select>
+
+                            <select id="expensePIC" name="pic" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select PIC (Optional)</option>
+                                <option value="Ayu">Ayu</option>
+                                <option value="Lili">Lili</option>
+                                <option value="Nadira">Nadira</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
+                        Submit Transaction
+                    </button>
+                </form>
+            </div>
+
+            <!-- Sales Summary Section (Right) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Recent Transactions</h2>
+                </div>
+
+                <!-- Filters -->
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <select id="recentFilterType" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All Types</option>
+                            <option value="penjualan">Sales</option>
+                            <option value="pengeluaran">Expense</option>
+                        </select>
+                        <select id="recentFilterPIC" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">All PIC</option>
+                        </select>
+                        <input type="date" id="recentFilterDate" placeholder="Filter by date" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <button id="applyRecentFilters" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                            Apply Filters
+                        </button>
+                        <button id="resetRecentFilters" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Transaction Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">PIC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTransactionTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Recent transactions will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Loading/Error States -->
+                <div id="recentLoadingState" class="text-center py-8 hidden">
+                    <div class="text-gray-600">Loading recent transactions...</div>
+                </div>
+
+                <div id="recentErrorState" class="text-center py-8 hidden">
+                    <div class="text-red-600">Error loading recent transactions.</div>
+                </div>
+
+                <div id="recentEmptyState" class="text-center py-8 hidden">
+                    <div class="text-gray-600">No recent transactions found.</div>
+                </div>
+            </div>
+        </div>
+                <!-- Loading/Error States -->
+                <div id="recentLoadingState" class="text-center py-8 hidden">
+                    <div class="text-gray-600">Loading recent transactions...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allTransactions = [];
+        let filteredTransactions = [];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('salesDate').value = today;
+            document.getElementById('expenseDate').value = today;
+
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Load recent transactions with filter capability
+            loadAndFilterRecentTransactions();
+            
+            // Initialize searchable dropdowns
+            initializeSearchableDropdowns();
+            
+            // Load products
+            loadProducts();
+        }
+
+        function setupEventListeners() {
+            // Transaction type switcher
+            document.getElementById('transactionType').addEventListener('change', toggleTransactionForm);
+            
+            // Form submission
+            document.getElementById('transactionForm').addEventListener('submit', handleFormSubmit);
+            
+            // Promo type handler
+            document.getElementById('salesPromo').addEventListener('change', handlePromoTypeChange);
+            
+            // Sales calculation - all quantity/price fields
+            document.getElementById('quantitySimple').addEventListener('input', calculateSalesTotal);
+            document.getElementById('priceSimple').addEventListener('input', calculateSalesTotal);
+            document.getElementById('quantityPromo').addEventListener('input', calculateSalesTotal);
+            document.getElementById('pricePromo').addEventListener('input', calculateSalesTotal);
+            
+            // Custom PIC handler
+            document.getElementById('salesPIC').addEventListener('change', handlePICSelection);
+            
+            
+            
+            // Free items handler
+            document.getElementById('addFreeItemBtn').addEventListener('click', addFreeItem);
+            
+            // Recent transaction filters
+            document.getElementById('applyRecentFilters').addEventListener('click', applyRecentFilters);
+            document.getElementById('resetRecentFilters').addEventListener('click', resetRecentFilters);
+            
+            // Product selection handler for auto-fill price
+            document.getElementById('salesProduct').addEventListener('change', handleProductSelection);
+        }
+
+        function handlePICSelection() {
+            const picSelect = document.getElementById('salesPIC');
+            const customPICInput = document.getElementById('customSalesPIC');
+            
+            if (picSelect.value === 'custom') {
+                customPICInput.classList.remove('hidden');
+                customPICInput.focus();
+            } else {
+                customPICInput.classList.add('hidden');
+                customPICInput.value = '';
+            }
+        }
+
+        function toggleTransactionForm() {
+            const type = document.getElementById('transactionType').value;
+            const salesForm = document.getElementById('salesForm');
+            const expenseForm = document.getElementById('expenseForm');
+            
+            if (type === 'penjualan') {
+                salesForm.classList.remove('hidden');
+                expenseForm.classList.add('hidden');
+            } else {
+                salesForm.classList.add('hidden');
+                expenseForm.classList.remove('hidden');
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('http://localhost:3001/api/products');
+                const products = await response.json();
+                
+                const productSelect = document.getElementById('salesProduct');
+                
+                // Clear existing options (except the first "Select Product" option)
+                productSelect.innerHTML = '<option value="">Select Product</option>';
+                
+                // Add products from database
+                products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.name;
+                    option.dataset.id = product.id;
+                    option.dataset.price = product.price;
+                    option.textContent = product.name; // Show only product name
+                    productSelect.appendChild(option);
+                });
+                
+                console.log(`✅ Loaded ${products.length} products from database`);
+            } catch (error) {
+                console.error('Error loading products:', error);
+                // Fallback: show error message
+                const productSelect = document.getElementById('salesProduct');
+                productSelect.innerHTML = '<option value="">Error loading products</option>';
+            }
+        }
+
+        function handleProductSelection() {
+            const productSelect = document.getElementById('salesProduct');
+            const selectedOption = productSelect.selectedOptions[0];
+            
+            if (selectedOption && selectedOption.dataset.price) {
+                const price = parseInt(selectedOption.dataset.price);
+                
+                // Auto-fill price based on promo type
+                const promoType = document.getElementById('salesPromo').value;
+                
+                if (promoType === 'No Promo' || promoType === '') {
+                    // For No Promo: fill the simple price input
+                    const priceInput = document.getElementById('priceSimple');
+                    if (priceInput) {
+                        priceInput.value = price;
+                    }
+                } else if (['B1G1', 'Bundling', 'Family Set', 'Random Set', 'Scrunchie Set', '2pcs Sablon'].includes(promoType)) {
+                    // For promo types: fill the fixed price input, replacing the default 10000
+                    const pricePromoInput = document.getElementById('pricePromo');
+                    if (pricePromoInput) {
+                        pricePromoInput.value = price;
+                    }
+                }
+                
+                // Recalculate total
+                calculateSalesTotal();
+            }
+        }
+
+        function addFreeItem() {
+            const container = document.getElementById('freeItemsContainer');
+            const currentItems = container.querySelectorAll('.free-item-row').length;
+            const newItemDiv = document.createElement('div');
+            newItemDiv.className = 'free-item-row border border-gray-200 rounded-lg p-3 space-y-2';
+            newItemDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700">Free Item ${currentItems + 1}</span>
+                    <button type="button" class="remove-free-item text-red-500 hover:text-red-700 px-2 py-1" onclick="removeFreeItem(this)">❌</button>
+                </div>
+                <input type="text" class="free-item-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Item name">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="searchable-dropdown">
+                        <input type="text" class="free-item-color w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
+                        <div class="dropdown-options free-color-dropdown">
+                            <div class="dropdown-option" data-value="Black">Black</div>
+                            <div class="dropdown-option" data-value="White">White</div>
+                            <div class="dropdown-option" data-value="Navy Blue">Navy Blue</div>
+                            <div class="dropdown-option" data-value="Sky Blue">Sky Blue</div>
+                            <div class="dropdown-option" data-value="Midnight Blue">Midnight Blue</div>
+                            <div class="dropdown-option" data-value="Royal Blue">Royal Blue</div>
+                            <div class="dropdown-option" data-value="Red">Red</div>
+                            <div class="dropdown-option" data-value="Maroon">Maroon</div>
+                            <div class="dropdown-option" data-value="Dark Red">Dark Red</div>
+                            <div class="dropdown-option" data-value="Green">Green</div>
+                            <div class="dropdown-option" data-value="Forest Green">Forest Green</div>
+                            <div class="dropdown-option" data-value="Olive Green">Olive Green</div>
+                            <div class="dropdown-option" data-value="Yellow">Yellow</div>
+                            <div class="dropdown-option" data-value="Orange">Orange</div>
+                            <div class="dropdown-option" data-value="Purple">Purple</div>
+                            <div class="dropdown-option" data-value="Pink">Pink</div>
+                            <div class="dropdown-option" data-value="Gray">Gray</div>
+                            <div class="dropdown-option" data-value="Light Gray">Light Gray</div>
+                            <div class="dropdown-option" data-value="Dark Gray">Dark Gray</div>
+                            <div class="dropdown-option" data-value="Brown">Brown</div>
+                            <div class="dropdown-option" data-value="Cream">Cream</div>
+                            <div class="dropdown-option" data-value="Beige">Beige</div>
+                        </div>
+                    </div>
+                    <div class="searchable-dropdown">
+                        <input type="text" class="free-item-size w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
+                        <div class="dropdown-options free-size-dropdown">
+                            <div class="dropdown-option" data-value="XS">XS</div>
+                            <div class="dropdown-option" data-value="S">S</div>
+                            <div class="dropdown-option" data-value="M">M</div>
+                            <div class="dropdown-option" data-value="L">L</div>
+                            <div class="dropdown-option" data-value="XL">XL</div>
+                            <div class="dropdown-option" data-value="XXL">XXL</div>
+                            <div class="dropdown-option" data-value="XXXL">XXXL</div>
+                            <div class="dropdown-option" data-value="All Size">All Size</div>
+                            <div class="dropdown-option" data-value="Kids S">Kids S</div>
+                            <div class="dropdown-option" data-value="Kids M">Kids M</div>
+                            <div class="dropdown-option" data-value="Kids L">Kids L</div>
+                            <div class="dropdown-option" data-value="Kids XL">Kids XL</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(newItemDiv);
+            
+            // Initialize searchable dropdowns for the new item
+            initializeSearchableDropdowns(newItemDiv);
+            
+            // Show remove buttons if more than one item
+            if (currentItems >= 1) {
+                container.querySelectorAll('.remove-free-item').forEach(btn => {
+                    btn.style.display = 'inline-block';
+                });
+            }
+        }
+
+        function removeFreeItem(button) {
+            const container = document.getElementById('freeItemsContainer');
+            const itemDiv = button.closest('.free-item-row');
+            itemDiv.remove();
+            
+            // Update labels and hide remove buttons if only one item left
+            const remainingItems = container.querySelectorAll('.free-item-row');
+            remainingItems.forEach((row, index) => {
+                const label = row.querySelector('.text-gray-700');
+                label.textContent = `Free Item ${index + 1}`;
+            });
+            
+            if (remainingItems.length <= 1) {
+                container.querySelectorAll('.remove-free-item').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            }
+        }
+
+        function getFreeItemsArray() {
+            const rows = document.querySelectorAll('.free-item-row');
+            const items = [];
+            rows.forEach(row => {
+                const name = row.querySelector('.free-item-input').value.trim();
+                const color = row.querySelector('.free-item-color').value.trim();
+                const size = row.querySelector('.free-item-size').value.trim();
+                
+                if (name) {
+                    let item = name;
+                    if (color) item += ` (${color}`;
+                    if (size) item += color ? ` - ${size})` : ` (${size})`;
+                    else if (color) item += ')';
+                    items.push(item);
+                }
+            });
+            return items;
+        }
+
+        function initializeSearchableDropdowns(container = document) {
+            const inputs = container.querySelectorAll('.searchable-dropdown input');
+            
+            inputs.forEach(input => {
+                const dropdown = input.nextElementSibling;
+                if (!dropdown || !dropdown.classList.contains('dropdown-options')) return;
+                
+                // Show dropdown on focus
+                input.addEventListener('focus', function() {
+                    dropdown.classList.add('show');
+                    filterDropdownOptions(input, dropdown, '');
+                });
+                
+                // Filter on input
+                input.addEventListener('input', function() {
+                    const query = this.value.toLowerCase();
+                    filterDropdownOptions(input, dropdown, query);
+                    dropdown.classList.add('show');
+                });
+                
+                // Hide dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+                
+                // Handle option selection
+                dropdown.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('dropdown-option')) {
+                        input.value = e.target.dataset.value;
+                        dropdown.classList.remove('show');
+                    }
+                });
+            });
+        }
+
+        function filterDropdownOptions(input, dropdown, query) {
+            const options = dropdown.querySelectorAll('.dropdown-option');
+            let visibleCount = 0;
+            
+            options.forEach(option => {
+                const text = option.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    option.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+            
+            // If no matches and user has typed something, show "Add new" option
+            if (visibleCount === 0 && query.trim()) {
+                // Create or show "add new" option
+                let addNewOption = dropdown.querySelector('.add-new-option');
+                if (!addNewOption) {
+                    addNewOption = document.createElement('div');
+                    addNewOption.className = 'dropdown-option add-new-option';
+                    addNewOption.style.fontStyle = 'italic';
+                    addNewOption.style.color = '#666';
+                    dropdown.appendChild(addNewOption);
+                }
+                addNewOption.textContent = `Add "${query}"`;
+                addNewOption.dataset.value = query;
+                addNewOption.style.display = 'block';
+            } else {
+                const addNewOption = dropdown.querySelector('.add-new-option');
+                if (addNewOption) {
+                    addNewOption.style.display = 'none';
+                }
+            }
+        }
+
+        function handlePromoTypeChange() {
+            const promoType = document.getElementById('salesPromo').value;
+            const noPromoFields = document.getElementById('noPromoFields');
+            const promoFields = document.getElementById('promoFields');
+            const priceBreakdown = document.getElementById('priceBreakdown');
+            const promoQtyLabel = document.getElementById('promoQtyLabel');
+            const promoPriceLabel = document.getElementById('promoPriceLabel');
+
+            // Hide all fields first
+            noPromoFields.classList.add('hidden');
+            promoFields.classList.add('hidden');
+            priceBreakdown.classList.add('hidden');
+
+            // Clear fields
+            document.getElementById('quantitySimple').value = '';
+            document.getElementById('priceSimple').value = '';
+            document.getElementById('quantityPromo').value = '';
+
+            if (promoType === 'No Promo' || promoType === '') {
+                noPromoFields.classList.remove('hidden');
+                
+                // Auto-fill price from selected product if available
+                const productSelect = document.getElementById('salesProduct');
+                const selectedOption = productSelect.selectedOptions[0];
+                if (selectedOption && selectedOption.dataset.price) {
+                    const priceInput = document.getElementById('priceSimple');
+                    if (priceInput) {
+                        priceInput.value = selectedOption.dataset.price;
+                    }
+                }
+            } else if (['B1G1', 'Bundling', 'Family Set', 'Random Set', 'Scrunchie Set', '2pcs Sablon'].includes(promoType)) {
+                promoFields.classList.remove('hidden');
+                
+                // Auto-fill price from selected product if available, otherwise use default
+                const productSelect = document.getElementById('salesProduct');
+                const selectedOption = productSelect.selectedOptions[0];
+                const price = selectedOption && selectedOption.dataset.price ? selectedOption.dataset.price : '10000';
+                
+                document.getElementById('pricePromo').value = price;
+                document.getElementById('pricePromo').readOnly = false;
+                document.getElementById('pricePromo').classList.remove('bg-gray-100');
+                
+                // Update labels based on promo type
+                promoQtyLabel.textContent = 'Quantity';
+                promoPriceLabel.innerHTML = 'Fixed Price <span class="ml-1 text-xs text-gray-500">(editable)</span>';
+            }
+            
+            calculateSalesTotal();
+        }
+
+        function calculateSalesTotal() {
+            const promoType = document.getElementById('salesPromo').value;
+            let quantity = 0;
+            let total = 0;
+            let price = 0;
+
+            // Get breakdown elements
+            const priceBreakdown = document.getElementById('priceBreakdown');
+            const normalBreakdown = document.getElementById('normalBreakdown');
+            const promoBreakdown = document.getElementById('promoBreakdown');
+
+            if (promoType === 'No Promo' || promoType === '') {
+                quantity = parseInt(document.getElementById('quantitySimple').value) || 0;
+                price = parseInt(document.getElementById('priceSimple').value) || 0;
+                total = quantity * price;
+
+                // Show simple breakdown for No Promo
+                if (quantity > 0 && price > 0) {
+                    priceBreakdown.classList.remove('hidden');
+                    normalBreakdown.classList.remove('hidden');
+                    promoBreakdown.classList.add('hidden');
+
+                    document.getElementById('normalQtyDisplay').textContent = quantity;
+                    document.getElementById('normalPriceDisplay').textContent = price.toLocaleString();
+                    document.getElementById('normalTotalDisplay').textContent = total.toLocaleString();
+                } else {
+                    priceBreakdown.classList.add('hidden');
+                }
+            } else if (['B1G1', 'Bundling', 'Family Set', 'Random Set', 'Scrunchie Set', '2pcs Sablon'].includes(promoType)) {
+                quantity = parseInt(document.getElementById('quantityPromo').value) || 0;
+                price = parseInt(document.getElementById('pricePromo').value) || 10000;
+                total = quantity * price;
+
+                // Show promo breakdown
+                if (quantity > 0) {
+                    priceBreakdown.classList.remove('hidden');
+                    normalBreakdown.classList.add('hidden');
+                    promoBreakdown.classList.remove('hidden');
+
+                    document.getElementById('promoQtyDisplay').textContent = quantity;
+                    document.getElementById('promoPriceDisplay').textContent = price.toLocaleString();
+                    document.getElementById('promoTotalDisplay').textContent = total.toLocaleString();
+                } else {
+                    priceBreakdown.classList.add('hidden');
+                }
+            } else {
+                priceBreakdown.classList.add('hidden');
+            }
+
+            // Update main calculation display
+            document.getElementById('salesTotal').textContent = formatCurrency(total);
+
+            // Update breakdown totals
+            if (!priceBreakdown.classList.contains('hidden')) {
+                document.getElementById('subtotalDisplay').textContent = total.toLocaleString();
+                document.getElementById('grandTotalDisplay').textContent = total.toLocaleString();
+            }
+
+            const calcDiv = document.getElementById('salesCalculation');
+            if (quantity > 0 && price > 0) {
+                calcDiv.classList.remove('hidden');
+            } else {
+                calcDiv.classList.add('hidden');
+            }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const type = document.getElementById('transactionType').value;
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                let transactionData = { type };
+                
+                if (type === 'penjualan') {
+                    let quantity = 0;
+let price = 0;
+let total = 0;
+
+const promoType = document.getElementById('salesPromo').value;
+
+if (promoType === 'No Promo') {
+  quantity = parseInt(document.getElementById('quantitySimple').value);
+  price = parseInt(document.getElementById('priceSimple').value);
+  total = quantity * price;
+} else {
+  const qtyNormal = parseInt(document.getElementById('quantityNormal').value) || 0;
+  const priceNormal = parseInt(document.getElementById('priceNormal').value) || 0;
+  const qtyPromo = parseInt(document.getElementById('quantityPromo').value) || 0;
+  const pricePromo = parseInt(document.getElementById('pricePromo').value) || 0;
+
+  quantity = qtyNormal + qtyPromo;
+  price = Math.floor((priceNormal * qtyNormal + pricePromo * qtyPromo) / (quantity || 1));
+  total = priceNormal * qtyNormal + pricePromo * qtyPromo;
+}
+
+
+                    
+                    // Handle custom PIC input
+                    let picSales = document.getElementById('salesPIC').value;
+                    if (picSales === 'custom') {
+                        picSales = document.getElementById('customSalesPIC').value;
+                    }
+                    
+                    // Get color and size data
+                    const productColor = document.getElementById('productColor').value.trim();
+                    const productSize = document.getElementById('productSize').value.trim();
+                    
+                    // Format product with color and size
+                    let productName = document.getElementById('salesProduct').value;
+                    if (productColor || productSize) {
+                        productName += ' (';
+                        if (productColor) productName += productColor;
+                        if (productColor && productSize) productName += ' - ';
+                        if (productSize) productName += productSize;
+                        productName += ')';
+                    }
+                    
+                    transactionData = {
+                        type: 'penjualan',
+                        date: document.getElementById('salesDate').value,
+                        product: productName,
+                        color: productColor || null,
+                        size: productSize || null,
+                        promo_type: document.getElementById('salesPromo').value,
+                        quantity: quantity,
+                        price_per_pcs: price,
+                        total: total,
+                        payment_method: document.getElementById('salesPayment').value,
+                        pic_sales: picSales,
+                        free_item: getFreeItemsArray().join(', ') || null
+                    };
+                } else {
+                    transactionData = {
+                        type: 'pengeluaran',
+                        date: document.getElementById('expenseDate').value,
+                        expense_category: document.getElementById('expenseCategory').value,
+                        description: document.getElementById('expenseDescription').value,
+                        amount: parseInt(document.getElementById('expenseAmount').value),
+                        payment_method: document.getElementById('expensePayment').value,
+                        pic: document.getElementById('expensePIC').value || null
+                    };
+                }
+                
+                const response = await fetch('http://localhost:3001/api/transactions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(transactionData)
+                });
+                
+                if (response.ok) {
+                    // Reset form
+                    document.getElementById('transactionForm').reset();
+                    document.getElementById('salesCalculation').classList.add('hidden');
+                    
+                    // Set today's date again
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('salesDate').value = today;
+                    document.getElementById('expenseDate').value = today;
+                    
+                    // Refresh recent transactions
+                    await loadAndFilterRecentTransactions();
+                    
+                    showNotification('Transaction added successfully!', 'success');
+                } else {
+                    const error = await response.json();
+                    showNotification(error.error || 'Failed to create transaction', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Network error occurred', 'error');
+            }
+            
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Transaction';
+        }
+
+
+
+
+
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID');
+        }
+
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined) return '-';
+            return `Rp ${amount.toLocaleString()}`;
+        }
+
+        async function loadRecentTransactions() {
+            try {
+                showRecentLoading();
+                
+                // Fetch latest 10 transactions
+                const response = await fetch('http://localhost:3001/api/transactions');
+                const transactions = await response.json();
+                
+                if (transactions.length === 0) {
+                    showRecentEmpty();
+                    return;
+                }
+                
+                // Take only the most recent 10 transactions
+                const recentTransactions = transactions.slice(0, 10);
+                
+                hideAllRecentStates();
+                renderRecentTransactionTable(recentTransactions);
+                
+            } catch (error) {
+                console.error('Error loading recent transactions:', error);
+                showRecentError();
+            }
+        }
+
+        function renderRecentTransactionTable(transactions) {
+            const tbody = document.getElementById('recentTransactionTableBody');
+            
+            tbody.innerHTML = transactions.map((transaction, index) => {
+                const isEven = index % 2 === 0;
+                const rowClass = isEven ? 'bg-white' : 'bg-gray-50';
+                
+                return `
+                    <tr class="${rowClass}">
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${formatDate(transaction.date)}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                transaction.type === 'penjualan' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-red-100 text-red-800'
+                            }">
+                                ${transaction.type === 'penjualan' ? 'Sales' : 'Expense'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-900">
+                            ${transaction.type === 'penjualan' 
+                                ? `<div class="font-medium">${transaction.product}</div>
+                                   <div class="text-xs text-gray-500">${transaction.promo_type} • ${transaction.quantity}x</div>`
+                                : `<div class="font-medium">${transaction.expense_category}</div>
+                                   <div class="text-xs text-gray-500">${transaction.description}</div>`
+                            }
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm">
+                            ${transaction.type === 'penjualan' 
+                                ? `<div class="font-bold text-green-600">${formatCurrency(transaction.total)}</div>`
+                                : `<div class="font-bold text-red-600">${formatCurrency(transaction.amount)}</div>`
+                            }
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${transaction.type === 'penjualan' ? transaction.pic_sales : (transaction.pic || '-')}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function showRecentLoading() {
+            hideAllRecentStates();
+            document.getElementById('recentLoadingState').classList.remove('hidden');
+        }
+
+        function showRecentError() {
+            hideAllRecentStates();
+            document.getElementById('recentErrorState').classList.remove('hidden');
+        }
+
+        function showRecentEmpty() {
+            hideAllRecentStates();
+            document.getElementById('recentEmptyState').classList.remove('hidden');
+        }
+
+        function hideAllRecentStates() {
+            document.getElementById('recentLoadingState').classList.add('hidden');
+            document.getElementById('recentErrorState').classList.add('hidden');
+            document.getElementById('recentEmptyState').classList.add('hidden');
+        }
+
+        // Recent transaction filter functions
+        let allRecentTransactions = [];
+
+        async function loadAndFilterRecentTransactions() {
+            try {
+                showRecentLoading();
+                
+                const response = await fetch('http://localhost:3001/api/transactions');
+                allRecentTransactions = await response.json();
+                
+                // Also populate PIC filter
+                populateRecentPICFilter();
+                
+                // Apply current filters
+                applyRecentFilters();
+                
+            } catch (error) {
+                console.error('Error loading recent transactions:', error);
+                showRecentError();
+            }
+        }
+
+        function populateRecentPICFilter() {
+            const picFilter = document.getElementById('recentFilterPIC');
+            const pics = [...new Set(allRecentTransactions.map(t => 
+                t.type === 'penjualan' ? t.pic_sales : t.pic
+            ).filter(pic => pic))];
+            
+            picFilter.innerHTML = '<option value="">All PIC</option>';
+            pics.forEach(pic => {
+                picFilter.innerHTML += `<option value="${pic}">${pic}</option>`;
+            });
+        }
+
+        function applyRecentFilters() {
+            const typeFilter = document.getElementById('recentFilterType').value;
+            const picFilter = document.getElementById('recentFilterPIC').value;
+            const dateFilter = document.getElementById('recentFilterDate').value;
+            
+            let filteredTransactions = allRecentTransactions.filter(transaction => {
+                if (typeFilter && transaction.type !== typeFilter) return false;
+                
+                if (picFilter) {
+                    const pic = transaction.type === 'penjualan' ? transaction.pic_sales : transaction.pic;
+                    if (pic !== picFilter) return false;
+                }
+                
+                if (dateFilter) {
+                    const transactionDate = transaction.date.split('T')[0];
+                    if (transactionDate !== dateFilter) return false;
+                }
+                
+                return true;
+            });
+            
+            // Take only the most recent 10 filtered transactions
+            filteredTransactions = filteredTransactions.slice(0, 10);
+            
+            if (filteredTransactions.length === 0) {
+                showRecentEmpty();
+                return;
+            }
+            
+            hideAllRecentStates();
+            renderRecentTransactionTable(filteredTransactions);
+        }
+
+        function resetRecentFilters() {
+            document.getElementById('recentFilterType').value = '';
+            document.getElementById('recentFilterPIC').value = '';
+            document.getElementById('recentFilterDate').value = '';
+            
+            // Show recent 10 transactions without filters
+            const recentTransactions = allRecentTransactions.slice(0, 10);
+            
+            if (recentTransactions.length === 0) {
+                showRecentEmpty();
+                return;
+            }
+            
+            hideAllRecentStates();
+            renderRecentTransactionTable(recentTransactions);
+        }
+
+        function showLoadingState() {
+            hideAllStates();
+            document.getElementById('loadingState').classList.remove('hidden');
+        }
+
+        function showErrorState(message) {
+            hideAllStates();
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorState').classList.remove('hidden');
+        }
+
+        function showEmptyState() {
+            hideAllStates();
+            document.getElementById('emptyState').classList.remove('hidden');
+        }
+
+        function hideAllStates() {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-md text-white z-50 ${
+                type === 'success' ? 'bg-green-600' : 'bg-red-600'
+            }`;
+            notification.textContent = message;
+            
+            // Add to DOM
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

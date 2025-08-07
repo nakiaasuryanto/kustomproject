@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Kustomproject</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">📊 Dashboard Summary</h1>
+            <p class="text-gray-600 mb-4">Financial Overview & Analytics</p>
+            <div class="space-x-3">
+                <a href="index.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    ← Back to Transactions
+                </a>
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Sales -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Penjualan</p>
+                        <p id="totalSales" class="text-2xl font-bold text-green-600">Rp 0</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span id="salesCount" class="text-sm text-gray-500">0 transactions</span>
+                </div>
+            </div>
+
+            <!-- Total Expenses -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Pengeluaran</p>
+                        <p id="totalExpenses" class="text-2xl font-bold text-red-600">Rp 0</p>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span id="expensesCount" class="text-sm text-gray-500">0 transactions</span>
+                </div>
+            </div>
+
+            <!-- Cash in Hand -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Cash in Hand</p>
+                        <p id="cashInHand" class="text-2xl font-bold text-blue-600">Rp 0</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-xs text-gray-500">Payment: CASH</span>
+                </div>
+            </div>
+
+            <!-- Cash in Bank (Mandiri) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Cash in Bank (Mandiri)</p>
+                        <p id="cashInBank" class="text-2xl font-bold text-purple-600">Rp 0</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-xs text-gray-500">Payment: TF</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Sales Distribution (Full Width) -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Product Sales Distribution</h3>
+                </div>
+                
+                <!-- Monthly Filter for Chart -->
+                <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Month</label>
+                            <input type="month" id="pieChartMonth" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <button id="updatePieChart" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors w-full">
+                                Update Chart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Pie Chart -->
+                    <div class="relative" style="height: 300px;">
+                        <canvas id="productSalesPieChart"></canvas>
+                    </div>
+                    
+                    <!-- Chart Stats -->
+                    <div id="pieChartStats" class="grid grid-cols-1 gap-4">
+                        <!-- Stats will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Loading/Error States -->
+                <div id="pieChartLoadingState" class="text-center py-8 hidden">
+                    <div class="text-gray-600">Loading chart data...</div>
+                </div>
+
+                <div id="pieChartErrorState" class="text-center py-8 hidden">
+                    <div class="text-red-600">Error loading chart data. Please try again.</div>
+                </div>
+
+                <div id="pieChartEmptyState" class="text-center py-8 hidden">
+                    <div class="text-gray-600">No sales data found for the selected period.</div>
+                </div>
+        </div>
+
+        <!-- Charts Row (Transaction Chart + PIC Sales Summary) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Transaction Chart with Date Filter -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold mb-4">Transaction Chart by Date</h3>
+                
+                <!-- Monthly Filter -->
+                <div class="mb-4 flex gap-3">
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">Month</label>
+                        <input type="month" id="chartMonth" class="px-2 py-1 border border-gray-300 rounded text-sm">
+                    </div>
+                    <div class="flex items-end">
+                        <button id="updateChart" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                            Update
+                        </button>
+                    </div>
+                </div>
+                
+                <canvas id="dailyChart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- PIC Sales Summary -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold mb-4">PIC Sales Summary</h3>
+                <div class="mb-4 text-sm text-gray-600">
+                    <p>📊 Sales transactions only</p>
+                    <p>💰 Total transactions by PIC</p>
+                </div>
+                
+                <!-- Monthly Filter -->
+                <div class="mb-4">
+                    <label class="block text-xs text-gray-600 mb-1">Month</label>
+                    <input type="month" id="picMonth" class="px-2 py-1 border border-gray-300 rounded text-sm">
+                </div>
+                
+                <div id="picSalesStats" class="space-y-3">
+                    <!-- PIC sales stats will be populated here -->
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p class="mt-2 text-gray-600">Loading dashboard data...</p>
+        </div>
+
+        <!-- Full Transaction Table with Filtering -->
+        <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">All Transactions</h2>
+            </div>
+
+            <!-- Filters -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-semibold mb-3">Filters</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <select id="filterType" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Types</option>
+                        <option value="penjualan">Sales</option>
+                        <option value="pengeluaran">Expense</option>
+                    </select>
+                    <select id="filterPIC" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All PIC</option>
+                    </select>
+                    <input type="date" id="filterStartDate" placeholder="Start Date" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="date" id="filterEndDate" placeholder="End Date" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mt-3 flex gap-2">
+                    <button id="applyFilters" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                        Apply Filters
+                    </button>
+                    <button id="resetFilters" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors">
+                        Reset
+                    </button>
+                    <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                        📤 Export Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transaction Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">PIC</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Transactions will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Loading/Error States -->
+            <div id="loadingState" class="text-center py-8 hidden">
+                <div class="text-gray-600">Loading transactions...</div>
+            </div>
+
+            <div id="errorState" class="text-center py-8 hidden">
+                <div class="text-red-600">Error loading transactions.</div>
+            </div>
+
+            <div id="emptyState" class="text-center py-8 hidden">
+                <div class="text-gray-600">No transactions found.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allTransactions = [];
+        let dailyChart = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDateFilters();
+            setupEventListeners();
+            fetchDashboardData();
+            loadProductChart();
+            fetchAllTransactions();
+        });
+
+        function initializeDateFilters() {
+            const today = new Date();
+            const currentMonth = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`;
+            
+            // Set current month for all monthly filters
+            document.getElementById('chartMonth').value = currentMonth;
+            document.getElementById('pieChartMonth').value = currentMonth;
+            document.getElementById('picMonth').value = currentMonth;
+        }
+
+        function setupEventListeners() {
+            document.getElementById('updateChart').addEventListener('click', updateDailyChart);
+            document.getElementById('updatePieChart').addEventListener('click', updateProductChart);
+            document.getElementById('picMonth').addEventListener('change', updatePICSalesStats);
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            document.getElementById('resetFilters').addEventListener('click', resetFilters);
+            document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+        }
+
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch('http://localhost:3001/api/transactions');
+                if (response.ok) {
+                    allTransactions = await response.json();
+                    
+                    // Hide loading state
+                    document.getElementById('loadingState').style.display = 'none';
+                    
+                    // Update all dashboard components
+                    updateSummaryCards();
+                    updatePICSalesStats();
+                    createDailyChart();
+                } else {
+                    throw new Error('Failed to fetch transactions');
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="text-red-600">
+                        <p>Error loading dashboard data</p>
+                        <button onclick="fetchDashboardData()" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function updateSummaryCards() {
+            const salesTransactions = allTransactions.filter(t => t.type === 'penjualan');
+            const expenseTransactions = allTransactions.filter(t => t.type === 'pengeluaran');
+            
+            // Calculate totals
+            const totalSales = salesTransactions.reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+            const totalExpenses = expenseTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+            
+            // Calculate cash breakdown for sales only
+            const cashInHand = salesTransactions
+                .filter(t => t.payment_method === 'CASH')
+                .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+            
+            const cashInBank = salesTransactions
+                .filter(t => t.payment_method === 'TF')
+                .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+            
+            // Update DOM
+            document.getElementById('totalSales').textContent = formatCurrency(totalSales);
+            document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('cashInHand').textContent = formatCurrency(cashInHand);
+            document.getElementById('cashInBank').textContent = formatCurrency(cashInBank);
+            
+            // Update counts
+            document.getElementById('salesCount').textContent = `${salesTransactions.length} transactions`;
+            document.getElementById('expensesCount').textContent = `${expenseTransactions.length} transactions`;
+        }
+
+        function updatePICSalesStats() {
+            const selectedMonth = document.getElementById('picMonth').value;
+            const picStats = {};
+            
+            // Filter transactions by month and type
+            let salesTransactions = allTransactions.filter(t => t.type === 'penjualan');
+            
+            if (selectedMonth) {
+                const [year, month] = selectedMonth.split('-');
+                salesTransactions = salesTransactions.filter(t => {
+                    const transactionDate = new Date(t.date);
+                    return transactionDate.getFullYear() == year && 
+                           (transactionDate.getMonth() + 1) == parseInt(month);
+                });
+            }
+            
+            salesTransactions.forEach(transaction => {
+                const pic = transaction.pic_sales;
+                if (pic) {
+                    if (!picStats[pic]) {
+                        picStats[pic] = {
+                            name: pic,
+                            transactionCount: 0,
+                            totalSales: 0
+                        };
+                    }
+                    
+                    picStats[pic].transactionCount++;
+                    picStats[pic].totalSales += Number(transaction.total) || 0;
+                }
+            });
+            
+            const picStatsContainer = document.getElementById('picSalesStats');
+            const sortedPICs = Object.values(picStats).sort((a, b) => b.totalSales - a.totalSales);
+            
+            picStatsContainer.innerHTML = sortedPICs.map(pic => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <h4 class="font-medium text-gray-900">${pic.name}</h4>
+                        <p class="text-sm text-gray-600">${pic.transactionCount} sales transactions</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold text-green-600">${formatCurrency(pic.totalSales)}</p>
+                        <p class="text-xs text-gray-500">Total Sales</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            if (sortedPICs.length === 0) {
+                picStatsContainer.innerHTML = '<p class="text-gray-500 text-center">No sales PIC data available</p>';
+            }
+        }
+
+
+        function createDailyChart() {
+            updateDailyChart();
+        }
+
+        function updateDailyChart() {
+            const ctx = document.getElementById('dailyChart').getContext('2d');
+            
+            // Get month from input
+            const selectedMonth = document.getElementById('chartMonth').value;
+            
+            if (!selectedMonth) {
+                console.log('Please select a month');
+                return;
+            }
+            
+            // Calculate start and end dates from month
+            const [year, month] = selectedMonth.split('-');
+            const startDate = `${year}-${month}-01`;
+            const endDate = new Date(year, month, 0).toISOString().split('T')[0]; // Last day of month
+            
+            // Get filtered daily data
+            const dailyData = getDailyData(startDate, endDate);
+            
+            console.log('📊 Daily Chart data:', dailyData);
+            
+            if (dailyChart) {
+                dailyChart.destroy();
+            }
+            
+            // Check if we have data
+            if (!dailyData.labels.length) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#6B7280';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data in selected date range', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+            
+            dailyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dailyData.labels,
+                    datasets: [
+                        {
+                            label: 'Penjualan',
+                            data: dailyData.sales,
+                            borderColor: 'rgb(34, 197, 94)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        },
+                        {
+                            label: 'Pengeluaran',
+                            data: dailyData.expenses,
+                            borderColor: 'rgb(239, 68, 68)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                maxTicksLimit: 6,
+                                callback: function(value) {
+                                    return formatCurrencyShort(value);
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tanggal'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getDailyData(startDate, endDate) {
+            const dailyStats = {};
+            
+            if (!allTransactions || allTransactions.length === 0) {
+                return { labels: [], sales: [], expenses: [] };
+            }
+            
+            // Filter transactions by date range
+            const filteredTransactions = allTransactions.filter(t => {
+                if (!t.date) return false;
+                const transactionDateStr = t.date.split('T')[0]; // Remove time if present
+                return transactionDateStr >= startDate && transactionDateStr <= endDate;
+            });
+            
+            // Group transactions by date
+            filteredTransactions.forEach(transaction => {
+                const dateStr = transaction.date.split('T')[0];
+                
+                if (!dailyStats[dateStr]) {
+                    dailyStats[dateStr] = {
+                        sales: 0,
+                        expenses: 0
+                    };
+                }
+                
+                if (transaction.type === 'penjualan') {
+                    dailyStats[dateStr].sales += Number(transaction.total) || 0;
+                } else if (transaction.type === 'pengeluaran') {
+                    dailyStats[dateStr].expenses += Number(transaction.amount) || 0;
+                }
+            });
+            
+            // Generate all dates in range (even if no transactions)
+            const dates = [];
+            const salesData = [];
+            const expensesData = [];
+            
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                const label = d.toLocaleDateString('id-ID', { 
+                    month: '2-digit', 
+                    day: '2-digit' 
+                });
+                
+                dates.push(label);
+                salesData.push(dailyStats[dateStr]?.sales || 0);
+                expensesData.push(dailyStats[dateStr]?.expenses || 0);
+            }
+            
+            return {
+                labels: dates,
+                sales: salesData,
+                expenses: expensesData
+            };
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID');
+        }
+
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined) return 'Rp 0';
+            return `Rp ${amount.toLocaleString()}`;
+        }
+
+        function formatCurrencyShort(amount) {
+            if (amount >= 1000000) {
+                return `${(amount / 1000000).toFixed(1)}M`;
+            } else if (amount >= 1000) {
+                return `${(amount / 1000).toFixed(1)}K`;
+            }
+            return amount.toString();
+        }
+
+        // Pie Chart functionality
+        let productChart = null;
+        let filteredTransactions = [];
+
+        async function loadProductChart() {
+            // Load chart data with current month
+            await updateProductChart();
+        }
+
+        async function updateProductChart() {
+            const selectedMonth = document.getElementById('pieChartMonth').value;
+            
+            if (!selectedMonth) {
+                console.log('Please select a month');
+                return;
+            }
+            
+            // Calculate start and end dates from month
+            const [year, month] = selectedMonth.split('-');
+            const startDate = `${year}-${month}-01`;
+            const endDate = new Date(year, month, 0).toISOString().split('T')[0]; // Last day of month
+            
+            try {
+                showPieChartLoading();
+                
+                // Fetch sales data
+                let url = 'http://localhost:3001/api/transactions?type=penjualan';
+                if (startDate) url += `&start=${startDate}`;
+                if (endDate) url += `&end=${endDate}`;
+                
+                const response = await fetch(url);
+                const transactions = await response.json();
+                
+                if (transactions.length === 0) {
+                    showPieChartEmpty();
+                    return;
+                }
+                
+                // Process data for pie chart
+                const productSales = {};
+                transactions.forEach(transaction => {
+                    const product = transaction.product.split('(')[0].trim(); // Remove color/size info
+                    if (!productSales[product]) {
+                        productSales[product] = {
+                            quantity: 0,
+                            total: 0
+                        };
+                    }
+                    productSales[product].quantity += transaction.quantity;
+                    productSales[product].total += transaction.total;
+                });
+                
+                // Sort by total sales
+                const sortedProducts = Object.entries(productSales)
+                    .sort((a, b) => b[1].total - a[1].total);
+                
+                // Prepare chart data
+                const labels = sortedProducts.map(([product]) => product);
+                const quantities = sortedProducts.map(([, data]) => data.quantity);
+                
+                // Generate colors
+                const colors = [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                    '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#36A2EB'
+                ];
+                
+                hideAllPieChartStates();
+                createPieChart(labels, quantities, colors);
+                updatePieChartStats(sortedProducts);
+                
+            } catch (error) {
+                console.error('Error loading chart data:', error);
+                showPieChartError();
+            }
+        }
+
+        function createPieChart(labels, data, colors) {
+            const ctx = document.getElementById('productSalesPieChart').getContext('2d');
+            
+            // Destroy existing chart
+            if (productChart) {
+                productChart.destroy();
+            }
+            
+            productChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.raw / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.raw} units (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updatePieChartStats(sortedProducts) {
+            const statsContainer = document.getElementById('pieChartStats');
+            const totalQuantity = sortedProducts.reduce((sum, [, data]) => sum + data.quantity, 0);
+            const totalRevenue = sortedProducts.reduce((sum, [, data]) => sum + data.total, 0);
+            
+            statsContainer.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg text-center">
+                    <div class="text-blue-800 font-semibold">Total Products</div>
+                    <div class="text-xl font-bold text-blue-600">${sortedProducts.length}</div>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg text-center">
+                    <div class="text-green-800 font-semibold">Total Quantity</div>
+                    <div class="text-xl font-bold text-green-600">${totalQuantity}</div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg text-center">
+                    <div class="text-purple-800 font-semibold">Total Revenue</div>
+                    <div class="text-xl font-bold text-purple-600">${formatCurrency(totalRevenue)}</div>
+                </div>
+            `;
+        }
+
+        // Transaction table functionality
+        async function fetchAllTransactions() {
+            try {
+                const response = await fetch('http://localhost:3001/api/transactions');
+                allTransactions = await response.json();
+                filteredTransactions = [...allTransactions];
+                renderTransactionTable();
+                populatePICFilter();
+            } catch (error) {
+                console.error('Error fetching transactions:', error);
+            }
+        }
+
+        function populatePICFilter() {
+            const picFilter = document.getElementById('filterPIC');
+            const pics = [...new Set(allTransactions.map(t => 
+                t.type === 'penjualan' ? t.pic_sales : t.pic
+            ).filter(pic => pic))];
+            
+            picFilter.innerHTML = '<option value="">All PIC</option>';
+            pics.forEach(pic => {
+                picFilter.innerHTML += `<option value="${pic}">${pic}</option>`;
+            });
+        }
+
+        function applyFilters() {
+            const typeFilter = document.getElementById('filterType').value;
+            const picFilter = document.getElementById('filterPIC').value;
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+            
+            filteredTransactions = allTransactions.filter(transaction => {
+                if (typeFilter && transaction.type !== typeFilter) return false;
+                
+                if (picFilter) {
+                    const pic = transaction.type === 'penjualan' ? transaction.pic_sales : transaction.pic;
+                    if (pic !== picFilter) return false;
+                }
+                
+                if (startDate && transaction.date < startDate) return false;
+                if (endDate && transaction.date > endDate) return false;
+                
+                return true;
+            });
+            
+            renderTransactionTable();
+        }
+
+        function resetFilters() {
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterPIC').value = '';
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+            
+            filteredTransactions = [...allTransactions];
+            renderTransactionTable();
+        }
+
+        function renderTransactionTable() {
+            const tbody = document.getElementById('transactionTableBody');
+            
+            if (filteredTransactions.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                return;
+            }
+            
+            document.getElementById('emptyState').classList.add('hidden');
+            
+            tbody.innerHTML = filteredTransactions.map((transaction, index) => {
+                const isEven = index % 2 === 0;
+                const rowClass = isEven ? 'bg-white' : 'bg-gray-50';
+                
+                return `
+                    <tr class="${rowClass}">
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${formatDate(transaction.date)}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                transaction.type === 'penjualan' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-red-100 text-red-800'
+                            }">
+                                ${transaction.type === 'penjualan' ? 'Sales' : 'Expense'}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-900">
+                            ${transaction.type === 'penjualan' 
+                                ? `<div class="font-medium">${transaction.product}</div>
+                                   <div class="text-xs text-gray-500">${transaction.promo_type} • ${transaction.quantity}x @ ${formatCurrency(transaction.price_per_pcs)}</div>`
+                                : `<div class="font-medium">${transaction.expense_category}</div>
+                                   <div class="text-xs text-gray-500">${transaction.description}</div>`
+                            }
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm">
+                            ${transaction.type === 'penjualan' 
+                                ? `<div class="font-bold text-green-600">${formatCurrency(transaction.total)}</div>`
+                                : `<div class="font-bold text-red-600">${formatCurrency(transaction.amount)}</div>`
+                            }
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${transaction.type === 'penjualan' ? transaction.pic_sales : (transaction.pic || '-')}
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                transaction.payment_method === 'CASH' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-blue-100 text-blue-800'
+                            }">
+                                ${transaction.payment_method}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportToExcel() {
+            const exportData = filteredTransactions.map(transaction => ({
+                'Date': formatDate(transaction.date),
+                'Type': transaction.type === 'penjualan' ? 'Sales' : 'Expense',
+                'Product/Category': transaction.type === 'penjualan' ? transaction.product : transaction.expense_category,
+                'Description': transaction.type === 'penjualan' ? `${transaction.promo_type} • ${transaction.quantity}x @ ${formatCurrency(transaction.price_per_pcs)}` : transaction.description,
+                'Quantity': transaction.quantity || '-',
+                'Price per pcs': transaction.price_per_pcs ? formatCurrency(transaction.price_per_pcs) : '-',
+                'Total/Amount': transaction.type === 'penjualan' ? formatCurrency(transaction.total) : formatCurrency(transaction.amount),
+                'PIC': transaction.type === 'penjualan' ? transaction.pic_sales : (transaction.pic || '-'),
+                'Payment Method': transaction.payment_method,
+                'Free Item': transaction.free_item || '-'
+            }));
+            
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
+            
+            const today = new Date();
+            const filename = `dashboard-transactions-${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}.xlsx`;
+            XLSX.writeFile(wb, filename);
+        }
+
+        // Pie chart state functions
+        function showPieChartLoading() {
+            hideAllPieChartStates();
+            document.getElementById('pieChartLoadingState').classList.remove('hidden');
+        }
+
+        function showPieChartError() {
+            hideAllPieChartStates();
+            document.getElementById('pieChartErrorState').classList.remove('hidden');
+        }
+
+        function showPieChartEmpty() {
+            hideAllPieChartStates();
+            document.getElementById('pieChartEmptyState').classList.remove('hidden');
+        }
+
+        function hideAllPieChartStates() {
+            document.getElementById('pieChartLoadingState').classList.add('hidden');
+            document.getElementById('pieChartErrorState').classList.add('hidden');
+            document.getElementById('pieChartEmptyState').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
