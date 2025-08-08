@@ -1123,6 +1123,16 @@
                 const isEven = index % 2 === 0;
                 const rowClass = isEven ? 'bg-white' : 'bg-gray-50';
                 
+                let detailsHtml = '';
+                if (transaction.type === 'penjualan') {
+                    const itemCount = transaction.items ? transaction.items.length : 0;
+                    detailsHtml = `<div class="font-medium">${itemCount} item(s)</div>
+                                   <div class="text-xs text-gray-500">${transaction.promo_type}</div>`;
+                } else {
+                    detailsHtml = `<div class="font-medium">${transaction.expense_category}</div>
+                                   <div class="text-xs text-gray-500">${transaction.description}</div>`;
+                }
+
                 return `
                     <tr class="${rowClass}">
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -1138,18 +1148,12 @@
                             </span>
                         </td>
                         <td class="px-4 py-4 text-sm text-gray-900">
-                            ${transaction.type === 'penjualan' 
-                                ? `<div class="font-medium">${transaction.product}</div>
-                                   <div class="text-xs text-gray-500">${transaction.promo_type} • ${transaction.quantity}x</div>`
-                                : `<div class="font-medium">${transaction.expense_category}</div>
-                                   <div class="text-xs text-gray-500">${transaction.description}</div>`
-                            }
+                            ${detailsHtml}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm">
-                            ${transaction.type === 'penjualan' 
-                                ? `<div class="font-bold text-green-600">${formatCurrency(transaction.total)}</div>`
-                                : `<div class="font-bold text-red-600">${formatCurrency(transaction.amount)}</div>`
-                            }
+                            <div class="font-bold ${transaction.type === 'penjualan' ? 'text-green-600' : 'text-red-600'}">
+                                ${formatCurrency(transaction.total || transaction.amount)}
+                            </div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                             ${transaction.type === 'penjualan' ? transaction.pic_sales : (transaction.pic || '-')}

@@ -18,7 +18,10 @@
             <p class="text-gray-600 mb-4">Financial Overview & Analytics</p>
             <div class="space-x-3">
                 <a href="index.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                    ← Back to Transactions
+                    ← Back to Input
+                </a>
+                <a href="transactions.html" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                    📜 View History
                 </a>
             </div>
         </header>
@@ -194,75 +197,7 @@
             <p class="mt-2 text-gray-600">Loading dashboard data...</p>
         </div>
 
-        <!-- Full Transaction Table with Filtering -->
-        <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">All Transactions</h2>
-                <a href="transactions.html" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
-                    View Detailed Transactions
-                </a>
-            </div>
-
-            <!-- Filters -->
-            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-                <h3 class="font-semibold mb-3">Filters</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <select id="filterType" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Types</option>
-                        <option value="penjualan">Sales</option>
-                        <option value="pengeluaran">Expense</option>
-                    </select>
-                    <select id="filterPIC" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All PIC</option>
-                    </select>
-                    <input type="date" id="filterStartDate" placeholder="Start Date" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="date" id="filterEndDate" placeholder="End Date" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="mt-3 flex gap-2">
-                    <button id="applyFilters" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                        Apply Filters
-                    </button>
-                    <button id="resetFilters" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors">
-                        Reset
-                    </button>
-                    <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
-                        📤 Export Excel
-                    </button>
-                </div>
-            </div>
-
-            <!-- Transaction Table -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full table-auto">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">PIC</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionTableBody" class="bg-white divide-y divide-gray-200">
-                        <!-- Transactions will be populated here -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Loading/Error States -->
-            <div id="loadingState" class="text-center py-8 hidden">
-                <div class="text-gray-600">Loading transactions...</div>
-            </div>
-
-            <div id="errorState" class="text-center py-8 hidden">
-                <div class="text-red-600">Error loading transactions.</div>
-            </div>
-
-            <div id="emptyState" class="text-center py-8 hidden">
-                <div class="text-gray-600">No transactions found.</div>
-            </div>
-        </div>
+        
     </div>
 
     <script>
@@ -629,15 +564,16 @@
                 
                 const productSales = {};
                 transactions.forEach(transaction => {
-                    const product = transaction.product.split('(')[0].trim();
-                    if (!productSales[product]) {
-                        productSales[product] = {
-                            quantity: 0,
-                            total: 0
-                        };
+                    if (transaction.items) {
+                        transaction.items.forEach(item => {
+                            const productName = item.product_name;
+                            if (!productSales[productName]) {
+                                productSales[productName] = { quantity: 0, total: 0 };
+                            }
+                            productSales[productName].quantity += item.quantity;
+                            productSales[productName].total += (item.quantity * item.price);
+                        });
                     }
-                    productSales[product].quantity += transaction.quantity;
-                    productSales[product].total += transaction.total;
                 });
                 
                 const sortedProducts = Object.entries(productSales)
