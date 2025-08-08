@@ -338,55 +338,51 @@
         });
 
         async function initializeApp() {
-            // Set today's date as default
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('salesDate').value = today;
-            document.getElementById('expenseDate').value = today;
-            document.getElementById('bundlingDate').value = today;
-            
-            // Initialize form on page load
-            toggleTransactionForm();
-
-            // Setup event listeners
-            setupEventListeners();
-            
-            // Load data from Supabase
-            await Promise.all([
-                loadProducts(),
-                loadColors(),
-                loadSizes(),
-                loadAndFilterRecentTransactions()
-            ]);
-            
-            // Initialize searchable dropdowns
-            initializeSearchableDropdowns();
+            try {
+                console.log('Initializing app...');
+                // Set today's date as default
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('salesDate').value = today;
+                document.getElementById('expenseDate').value = today;
+                document.getElementById('bundlingDate').value = today;
+                
+                // Setup event listeners first
+                setupEventListeners();
+                
+                // Load data from Supabase
+                console.log('Loading data from Supabase...');
+                await Promise.all([
+                    loadProducts(),
+                    loadColors(),
+                    loadSizes(),
+                    loadAndFilterRecentTransactions()
+                ]);
+                console.log('Data loaded successfully');
+                
+                // Initialize form on page load after data is loaded
+                toggleTransactionForm();
+                
+                // Initialize searchable dropdowns
+                initializeSearchableDropdowns();
+                
+                console.log('App initialized successfully');
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                showNotification('Error loading app. Please refresh the page.', 'error');
+            }
         }
 
         async function loadProducts() {
-            products = await getProducts();
-            populateProductDropdowns();
-        }
-        
-        function populateProductDropdowns() {
-            // Form Type 1 product dropdowns
-            const mainProductSelects = document.querySelectorAll('.item-product');
-            
-            // Form Type 2 product dropdowns 
-            const bundleProductSelects = document.querySelectorAll('.bundle-product');
-            
-            [...mainProductSelects, ...bundleProductSelects].forEach(select => {
-                select.innerHTML = '<option value="">Select Product</option>';
-                products.forEach(product => {
-                    const option = document.createElement('option');
-                    option.value = product.id;
-                    option.textContent = product.name;
-                    option.dataset.product = JSON.stringify(product);
-                    select.appendChild(option);
-                });
-                
-                // Add change listener for automatic price calculation
-                select.addEventListener('change', handleProductSelection);
-            });
+            try {
+                console.log('Loading products...');
+                products = await getProducts();
+                console.log('Products loaded:', products.length, 'products');
+                return products;
+            } catch (error) {
+                console.error('Error loading products:', error);
+                products = [];
+                return [];
+            }
         }
 
         async function loadColors() {
@@ -630,6 +626,8 @@
             const formType1 = document.getElementById('formType1');
             const formType2 = document.getElementById('formType2');
             
+            console.log('Promo type changed to:', promoType);
+            
             // Hide both forms first
             formType1.classList.add('hidden');
             formType2.classList.add('hidden');
@@ -643,6 +641,228 @@
                 formType2.classList.remove('hidden');
                 initializeFormType2();
             }
+        }
+        
+        function initializeFormType1() {
+            console.log('Initializing Form Type 1...');
+            // Clear existing items first
+            const mainContainer = document.getElementById('mainItemsContainer');
+            mainContainer.innerHTML = '';
+            
+            // Add first main item
+            addMainItem();
+            
+            // Set up quantity/price change listeners for automatic calculation
+            setupItemCalculationListeners();
+        }
+        
+        function initializeFormType2() {
+            console.log('Initializing Form Type 2...');
+            // Clear existing items first
+            const bundleContainer = document.getElementById('bundleItemsContainer');
+            bundleContainer.innerHTML = '';
+            
+            // Add first bundle item
+            addBundleItem();
+        }
+        
+        function addMainItem() {
+            const container = document.getElementById('mainItemsContainer');
+            const itemCount = container.children.length + 1;
+            
+            console.log('Adding main item', itemCount);
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'main-item border border-gray-200 rounded-lg p-4 space-y-3';
+            itemDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <h4 class="font-medium text-gray-800">Item ${itemCount}</h4>
+                    ${itemCount > 1 ? '<button type="button" class="remove-item text-red-500 hover:text-red-700" onclick="removeItem(this)">❌</button>' : ''}
+                </div>
+                <select class="item-product w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select Product</option>
+                </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="searchable-dropdown">
+                        <label class="block text-sm text-gray-600 mb-1">Color</label>
+                        <input type="text" class="item-color w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
+                        <div class="dropdown-options color-dropdown"></div>
+                    </div>
+                    <div class="searchable-dropdown">
+                        <label class="block text-sm text-gray-600 mb-1">Size</label>
+                        <input type="text" class="item-size w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
+                        <div class="dropdown-options size-dropdown"></div>
+                    </div>
+                </div>
+                <input type="number" class="item-quantity w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Quantity" min="1">
+                <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" placeholder="Price (auto)" readonly>
+            `;
+            
+            container.appendChild(itemDiv);
+            
+            // Populate product dropdown and setup listeners
+            const productSelect = itemDiv.querySelector('.item-product');
+            console.log('Populating product dropdown with', products.length, 'products');
+            if (products && products.length > 0) {
+                products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.id;
+                    option.textContent = product.name;
+                    option.dataset.product = JSON.stringify(product);
+                    productSelect.appendChild(option);
+                });
+            } else {
+                console.warn('No products available to populate dropdown');
+            }
+            
+            productSelect.addEventListener('change', handleProductSelection);
+            itemDiv.querySelector('.item-quantity').addEventListener('input', calculateTotal);
+            
+            // Initialize searchable dropdowns for this item
+            initializeSearchableDropdowns(itemDiv);
+            
+            // Load colors and sizes for dropdowns
+            loadColorsAndSizes(itemDiv);
+        }
+        
+        function addBundleItem() {
+            const container = document.getElementById('bundleItemsContainer');
+            const itemCount = container.children.length + 1;
+            
+            console.log('Adding bundle item', itemCount);
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'bundle-item border border-gray-200 rounded-lg p-4 space-y-3';
+            itemDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <h4 class="font-medium text-gray-800">Item ${itemCount}</h4>
+                    ${itemCount > 1 ? '<button type="button" class="remove-item text-red-500 hover:text-red-700" onclick="removeItem(this)">❌</button>' : ''}
+                </div>
+                <select class="bundle-product w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select Product</option>
+                </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="searchable-dropdown">
+                        <label class="block text-sm text-gray-600 mb-1">Color</label>
+                        <input type="text" class="bundle-color w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
+                        <div class="dropdown-options color-dropdown"></div>
+                    </div>
+                    <div class="searchable-dropdown">
+                        <label class="block text-sm text-gray-600 mb-1">Size</label>
+                        <input type="text" class="bundle-size w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
+                        <div class="dropdown-options size-dropdown"></div>
+                    </div>
+                </div>
+                <input type="number" class="bundle-quantity w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Quantity" min="1">
+            `;
+            
+            container.appendChild(itemDiv);
+            
+            // Populate product dropdown
+            const productSelect = itemDiv.querySelector('.bundle-product');
+            console.log('Populating bundle product dropdown with', products.length, 'products');
+            if (products && products.length > 0) {
+                products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.id;
+                    option.textContent = product.name;
+                    option.dataset.product = JSON.stringify(product);
+                    productSelect.appendChild(option);
+                });
+            } else {
+                console.warn('No products available to populate bundle dropdown');
+            }
+            
+            // Initialize searchable dropdowns for this item
+            initializeSearchableDropdowns(itemDiv);
+            
+            // Load colors and sizes for dropdowns
+            loadColorsAndSizes(itemDiv);
+        }
+        
+        function removeItem(button) {
+            const container = button.closest('#mainItemsContainer, #bundleItemsContainer');
+            const itemDiv = button.closest('.main-item, .bundle-item');
+            itemDiv.remove();
+            
+            // Update item numbers and remove buttons
+            const items = container.children;
+            Array.from(items).forEach((item, index) => {
+                const title = item.querySelector('h4');
+                title.textContent = `Item ${index + 1}`;
+                
+                const removeBtn = item.querySelector('.remove-item');
+                if (index === 0) {
+                    if (removeBtn) removeBtn.remove();
+                } else if (!removeBtn) {
+                    const titleContainer = item.querySelector('.flex');
+                    titleContainer.innerHTML += '<button type="button" class="remove-item text-red-500 hover:text-red-700" onclick="removeItem(this)">❌</button>';
+                }
+            });
+            
+            // Recalculate total for Form Type 1
+            if (container.id === 'mainItemsContainer') {
+                calculateTotal();
+            }
+        }
+        
+        async function loadColorsAndSizes(container) {
+            const colorDropdown = container.querySelector('.color-dropdown');
+            const sizeDropdown = container.querySelector('.size-dropdown');
+            
+            try {
+                // Load colors
+                const colors = await getColors();
+                colorDropdown.innerHTML = '';
+                colors.forEach(color => {
+                    const option = document.createElement('div');
+                    option.className = 'dropdown-option';
+                    option.dataset.value = color.name;
+                    option.textContent = color.name;
+                    colorDropdown.appendChild(option);
+                });
+                
+                // Load sizes
+                const sizes = await getSizes();
+                sizeDropdown.innerHTML = '';
+                sizes.forEach(size => {
+                    const option = document.createElement('div');
+                    option.className = 'dropdown-option';
+                    option.dataset.value = size.name;
+                    option.textContent = size.name;
+                    sizeDropdown.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading colors and sizes:', error);
+            }
+        }
+        
+        function setupItemCalculationListeners() {
+            // This will be called when Form Type 1 is initialized
+            const container = document.getElementById('mainItemsContainer');
+            container.addEventListener('input', function(e) {
+                if (e.target.classList.contains('item-quantity')) {
+                    calculateTotal();
+                }
+            });
+        }
+        
+        function calculateTotal() {
+            const promoType = document.getElementById('promoType').value;
+            let grandTotal = 0;
+            
+            if (promoType === 'No Promo' || promoType === 'B1G1') {
+                // Calculate total for Form Type 1
+                const items = document.querySelectorAll('#mainItemsContainer .main-item');
+                items.forEach(item => {
+                    const quantity = parseInt(item.querySelector('.item-quantity').value) || 0;
+                    const price = parseInt(item.querySelector('.item-price').value) || 0;
+                    grandTotal += quantity * price;
+                });
+                
+                document.getElementById('grandTotal').textContent = `Rp ${grandTotal.toLocaleString()}`;
+            }
+            // For Form Type 2, total is manually entered, so no calculation needed
         }
 
 
