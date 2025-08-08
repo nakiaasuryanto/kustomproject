@@ -445,28 +445,30 @@
         }
 
 
-        function handleProductSelection() {
-            const productSelect = document.getElementById('salesProduct');
+        function handleProductSelection(event) {
+            const productSelect = event.target;
             const selectedOption = productSelect.selectedOptions[0];
-            const promoType = document.getElementById('salesPromo').value;
+            const promoType = document.getElementById('promoType').value;
             
             if (selectedOption && selectedOption.dataset.product) {
                 const product = JSON.parse(selectedOption.dataset.product);
                 const price = getProductPrice(product, promoType);
                 
-                if (promoType === 'No Promo' || promoType === '') {
-                    const priceInput = document.getElementById('priceSimple');
-                    if (priceInput) {
-                        priceInput.value = price;
-                    }
-                } else {
-                    const pricePromoInput = document.getElementById('pricePromo');
-                    if (pricePromoInput) {
-                        pricePromoInput.value = price;
-                    }
+                console.log('Product selected:', product.name, 'Promo:', promoType, 'Price:', price);
+                
+                // Find the price input in the same item container
+                const itemContainer = productSelect.closest('.main-item, .bundle-item');
+                const priceInput = itemContainer.querySelector('.item-price');
+                
+                if (priceInput) {
+                    priceInput.value = price;
+                    calculateTotal();
                 }
                 
-                calculateSalesTotal();
+                // For bundling forms, also update the automatic bundling calculation
+                if (promoType === 'Bundling') {
+                    calculateBundlingPrice();
+                }
             }
         }
 
@@ -640,6 +642,20 @@
                 // Show Form Type 2: Bundling, Family, Random
                 formType2.classList.remove('hidden');
                 initializeFormType2();
+                
+                // Configure price input based on promo type
+                const bundlePriceInput = document.getElementById('bundlePrice');
+                if (promoType === 'Bundling') {
+                    bundlePriceInput.readOnly = true;
+                    bundlePriceInput.classList.add('bg-gray-100');
+                    bundlePriceInput.setAttribute('placeholder', 'Auto-calculated bundling price');
+                } else {
+                    // Family and Random use manual entry
+                    bundlePriceInput.readOnly = false;
+                    bundlePriceInput.classList.remove('bg-gray-100');
+                    bundlePriceInput.setAttribute('placeholder', 'Enter Price Manually');
+                    bundlePriceInput.value = '';
+                }
             }
         }
         
@@ -773,6 +789,14 @@
                 console.warn('No products available to populate bundle dropdown');
             }
             
+            // Add event listeners for bundling calculation
+            productSelect.addEventListener('change', handleProductSelection);
+            itemDiv.querySelector('.bundle-quantity').addEventListener('input', () => {
+                if (document.getElementById('promoType').value === 'Bundling') {
+                    calculateBundlingPrice();
+                }
+            });
+            
             // Initialize searchable dropdowns for this item
             initializeSearchableDropdowns(itemDiv);
             
@@ -861,8 +885,47 @@
                 });
                 
                 document.getElementById('grandTotal').textContent = `Rp ${grandTotal.toLocaleString()}`;
+            } else if (promoType === 'Bundling') {
+                // For bundling, calculate automatically
+                calculateBundlingPrice();
             }
-            // For Form Type 2, total is manually entered, so no calculation needed
+            // For Family and Random, total is manually entered
+        }
+        
+        function calculateBundlingPrice() {
+            console.log('Calculating bundling price...');
+            let totalB1G1Price = 0;
+            
+            // Get all bundle items and sum their B1G1 prices
+            const bundleItems = document.querySelectorAll('#bundleItemsContainer .bundle-item');
+            bundleItems.forEach(item => {
+                const productSelect = item.querySelector('.bundle-product');
+                const quantity = parseInt(item.querySelector('.bundle-quantity').value) || 0;
+                
+                if (productSelect.value && quantity > 0) {
+                    const selectedOption = productSelect.selectedOptions[0];
+                    if (selectedOption && selectedOption.dataset.product) {
+                        const product = JSON.parse(selectedOption.dataset.product);
+                        const b1g1Price = product.price_b1g1;
+                        totalB1G1Price += (b1g1Price * quantity);
+                        console.log('Item:', product.name, 'Qty:', quantity, 'B1G1 Price:', b1g1Price);
+                    }
+                }
+            });
+            
+            // Bundling formula: total B1G1 price divided by 2
+            const bundlingPrice = Math.floor(totalB1G1Price / 2);
+            console.log('Total B1G1 price:', totalB1G1Price, 'Bundling price:', bundlingPrice);
+            
+            // Update the manual price input with the calculated bundling price
+            const bundlePriceInput = document.getElementById('bundlePrice');
+            if (bundlePriceInput) {
+                bundlePriceInput.value = bundlingPrice;
+                // Make it readonly to show it's calculated automatically
+                bundlePriceInput.readOnly = true;
+                bundlePriceInput.classList.add('bg-gray-100');
+                bundlePriceInput.setAttribute('placeholder', 'Auto-calculated bundling price');
+            }
         }
 
 
