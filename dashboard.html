@@ -209,7 +209,7 @@
             initializeDateFilters();
             setupEventListeners();
             fetchDashboardData();
-            loadProductChart();
+            // loadProductChart(); // This is now called within fetchDashboardData
             fetchAllTransactions();
         });
 
@@ -234,13 +234,20 @@
 
         async function fetchDashboardData() {
             try {
-                allTransactions = await getTransactions();
-                
-                document.getElementById('loadingState').style.display = 'none';
-                
-                updateSummaryCards();
+                // First, quickly fetch and display the summary cards.
+                const summary = await getDashboardSummary();
+                if (summary) {
+                    updateSummaryCards(summary);
+                    // Hide the main loading spinner once summaries are loaded.
+                    document.getElementById('loadingState').style.display = 'none';
+                }
+
+                // Then, trigger the individual chart updates.
+                // These will fetch their own data and won't block the initial page load.
+                updateDailyChart();
                 updatePICSalesStats();
-                createDailyChart();
+                updateProductChart();
+
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
                 document.getElementById('loadingState').innerHTML = `
@@ -254,56 +261,26 @@
             }
         }
 
-        function updateSummaryCards() {
-            const salesTransactions = allTransactions.filter(t => t.type === 'penjualan');
-            const expenseTransactions = allTransactions.filter(t => t.type === 'pengeluaran');
-            
-            const totalSales = salesTransactions.reduce((sum, t) => sum + (Number(t.total) || 0), 0);
-            const totalExpenses = expenseTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-            
-            const cashSales = salesTransactions
-                .filter(t => t.payment_method === 'CASH')
-                .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
-            
-            const cashExpenses = expenseTransactions
-                .filter(t => t.payment_method === 'CASH')
-                .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-            const tfSales = salesTransactions
-                .filter(t => t.payment_method === 'Mandiri' || t.payment_method === 'TF')
-                .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
-
-            const tfExpenses = expenseTransactions
-                .filter(t => t.payment_method === 'Mandiri' || t.payment_method === 'TF')
-                .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
-
-            const cashInHand = cashSales - cashExpenses;
-            const cashInBank = tfSales - tfExpenses;
-            
-            document.getElementById('totalSales').textContent = formatCurrency(totalSales);
-            document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
-            document.getElementById('cashInHand').textContent = formatCurrency(cashInHand);
-            document.getElementById('cashInBank').textContent = formatCurrency(cashInBank);
-            
-            document.getElementById('salesCount').textContent = `${salesTransactions.length} transactions`;
-            document.getElementById('expensesCount').textContent = `${expenseTransactions.length} transactions`;
+        function updateSummaryCards(summary) {
+            document.getElementById('totalSales').textContent = formatCurrency(summary.totalsales);
+            document.getElementById('totalExpenses').textContent = formatCurrency(summary.totalexpenses);
+            document.getElementById('cashInHand').textContent = formatCurrency(summary.cashinhand);
+            document.getElementById('cashInBank').textContent = formatCurrency(summary.cashinbank);
+            document.getElementById('salesCount').textContent = `${summary.salescount} transactions`;
+            document.getElementById('expensesCount').textContent = `${summary.expensescount} transactions`;
         }
 
-        function updatePICSalesStats() {
+        async function updatePICSalesStats() {
             const selectedMonth = document.getElementById('picMonth').value;
             const picStats = {};
             
-            let salesTransactions = allTransactions.filter(t => t.type === 'penjualan');
-            
-            if (selectedMonth) {
-                const [year, month] = selectedMonth.split('-');
-                salesTransactions = salesTransactions.filter(t => {
-                    const transactionDate = new Date(t.date);
-                    return transactionDate.getFullYear() == year && 
-                           (transactionDate.getMonth() + 1) == parseInt(month);
-                });
-            }
-            
+            const [year, month] = selectedMonth.split('-');
+            const startDate = `${year}-${month}-01`;
+            const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+
+            // Fetch only the data needed for this chart
+            const salesTransactions = await getTransactions({ type: 'penjualan', startDate, endDate });
+
             salesTransactions.forEach(transaction => {
                 const pic = transaction.pic_sales;
                 if (pic) {
@@ -353,10 +330,9 @@
             updateDailyChart();
         }
 
-        function updateDailyChart() {
+        async function updateDailyChart() {
             const ctx = document.getElementById('dailyChart').getContext('2d');
             
-            // Get month from input
             const selectedMonth = document.getElementById('chartMonth').value;
             
             if (!selectedMonth) {
@@ -364,21 +340,18 @@
                 return;
             }
             
-            // Calculate start and end dates from month
             const [year, month] = selectedMonth.split('-');
             const startDate = `${year}-${month}-01`;
-            const endDate = new Date(year, month, 0).toISOString().split('T')[0]; // Last day of month
-            
-            // Get filtered daily data
-            const dailyData = getDailyData(startDate, endDate);
-            
-            console.log('📊 Daily Chart data:', dailyData);
+            const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+
+            // Fetch only the data needed for this chart
+            const transactions = await getTransactions({ startDate, endDate });
+            const dailyData = getDailyData(transactions, startDate, endDate);
             
             if (dailyChart) {
                 dailyChart.destroy();
             }
             
-            // Check if we have data
             if (!dailyData.labels.length) {
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                 ctx.font = '14px Arial';
@@ -452,29 +425,18 @@
             });
         }
 
-        function getDailyData(startDate, endDate) {
+        function getDailyData(transactions, startDate, endDate) {
             const dailyStats = {};
             
-            if (!allTransactions || allTransactions.length === 0) {
+            if (!transactions || transactions.length === 0) {
                 return { labels: [], sales: [], expenses: [] };
             }
             
-            // Filter transactions by date range
-            const filteredTransactions = allTransactions.filter(t => {
-                if (!t.date) return false;
-                const transactionDateStr = t.date.split('T')[0]; // Remove time if present
-                return transactionDateStr >= startDate && transactionDateStr <= endDate;
-            });
-            
-            // Group transactions by date
-            filteredTransactions.forEach(transaction => {
+            transactions.forEach(transaction => {
                 const dateStr = transaction.date.split('T')[0];
                 
                 if (!dailyStats[dateStr]) {
-                    dailyStats[dateStr] = {
-                        sales: 0,
-                        expenses: 0
-                    };
+                    dailyStats[dateStr] = { sales: 0, expenses: 0 };
                 }
                 
                 if (transaction.type === 'penjualan') {
@@ -484,7 +446,6 @@
                 }
             });
             
-            // Generate all dates in range (even if no transactions)
             const dates = [];
             const salesData = [];
             const expensesData = [];
@@ -494,10 +455,7 @@
             
             for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
                 const dateStr = d.toISOString().split('T')[0];
-                const label = d.toLocaleDateString('id-ID', { 
-                    month: '2-digit', 
-                    day: '2-digit' 
-                });
+                const label = d.toLocaleDateString('id-ID', { month: '2-digit', day: '2-digit' });
                 
                 dates.push(label);
                 salesData.push(dailyStats[dateStr]?.sales || 0);
