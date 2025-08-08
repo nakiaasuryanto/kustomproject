@@ -249,12 +249,12 @@
             const salesTransactions = transactions.filter(t => t.type === 'penjualan');
             const expenseTransactions = transactions.filter(t => t.type === 'pengeluaran');
 
-            const totalSales = salesTransactions.reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+            const totalSales = salesTransactions.reduce((sum, t) => sum + (Number(t.total) || 0) + (Number(t.manual_price) || 0), 0);
             const totalExpenses = expenseTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
             const cashSales = salesTransactions
                 .filter(t => t.payment_method === 'CASH')
-                .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+                .reduce((sum, t) => sum + (Number(t.total) || 0) + (Number(t.manual_price) || 0), 0);
             
             const cashExpenses = expenseTransactions
                 .filter(t => t.payment_method === 'CASH')
@@ -262,7 +262,7 @@
 
             const tfSales = salesTransactions
                 .filter(t => t.payment_method === 'Mandiri' || t.payment_method === 'TF')
-                .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+                .reduce((sum, t) => sum + (Number(t.total) || 0) + (Number(t.manual_price) || 0), 0);
 
             const tfExpenses = expenseTransactions
                 .filter(t => t.payment_method === 'Mandiri' || t.payment_method === 'TF')
@@ -305,7 +305,7 @@
                     }
                     
                     picStats[pic].transactionCount++;
-                    picStats[pic].totalSales += Number(transaction.total) || 0;
+                    picStats[pic].totalSales += (Number(transaction.total) || 0) + (Number(transaction.manual_price) || 0);
                     picStats[pic].totalManualPrice += Number(transaction.manual_price) || 0;
 
                     if (transaction.items) {
