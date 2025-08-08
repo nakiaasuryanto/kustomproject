@@ -223,13 +223,8 @@
 
         async function fetchDashboardData() {
             try {
-                // First, quickly fetch and display the summary cards.
-                const summary = await getDashboardSummary();
-                if (summary) {
-                    updateSummaryCards(summary);
-                    // Hide the main loading spinner once summaries are loaded.
-                    document.getElementById('loadingState').style.display = 'none';
-                }
+                allTransactions = await getTransactions();
+                updateSummaryCards(allTransactions);
 
                 // Then, trigger the individual chart updates.
                 // These will fetch their own data and won't block the initial page load.
@@ -250,13 +245,38 @@
             }
         }
 
-        function updateSummaryCards(summary) {
-            document.getElementById('totalSales').textContent = formatCurrency(summary.totalsales);
-            document.getElementById('totalExpenses').textContent = formatCurrency(summary.totalexpenses);
-            document.getElementById('cashInHand').textContent = formatCurrency(summary.cashinhand);
-            document.getElementById('cashInBank').textContent = formatCurrency(summary.cashinbank);
-            document.getElementById('salesCount').textContent = `${summary.salescount} transactions`;
-            document.getElementById('expensesCount').textContent = `${summary.expensescount} transactions`;
+        function updateSummaryCards(transactions) {
+            const salesTransactions = transactions.filter(t => t.type === 'penjualan');
+            const expenseTransactions = transactions.filter(t => t.type === 'pengeluaran');
+
+            const totalSales = salesTransactions.reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+            const totalExpenses = expenseTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+            const cashSales = salesTransactions
+                .filter(t => t.payment_method === 'CASH')
+                .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+            
+            const cashExpenses = expenseTransactions
+                .filter(t => t.payment_method === 'CASH')
+                .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+            const tfSales = salesTransactions
+                .filter(t => t.payment_method === 'Mandiri' || t.payment_method === 'TF')
+                .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+
+            const tfExpenses = expenseTransactions
+                .filter(t => t.payment_method === 'Mandiri' || t.payment_method === 'TF')
+                .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+            const cashInHand = cashSales - cashExpenses;
+            const cashInBank = tfSales - tfExpenses;
+
+            document.getElementById('totalSales').textContent = formatCurrency(totalSales);
+            document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('cashInHand').textContent = formatCurrency(cashInHand);
+            document.getElementById('cashInBank').textContent = formatCurrency(cashInBank);
+            document.getElementById('salesCount').textContent = `${salesTransactions.length} transactions`;
+            document.getElementById('expensesCount').textContent = `${expenseTransactions.length} transactions`;
         }
 
         async function updatePICSalesStats() {
@@ -278,12 +298,21 @@
                             name: pic,
                             transactionCount: 0,
                             totalSales: 0,
+                            totalItems: 0,
+                            totalManualPrice: 0,
                             commission: 0
                         };
                     }
                     
                     picStats[pic].transactionCount++;
                     picStats[pic].totalSales += Number(transaction.total) || 0;
+                    picStats[pic].totalManualPrice += Number(transaction.manual_price) || 0;
+
+                    if (transaction.items) {
+                        transaction.items.forEach(item => {
+                            picStats[pic].totalItems += item.quantity;
+                        });
+                    }
                 }
             });
             
@@ -299,12 +328,15 @@
                     <div>
                         <h4 class="font-medium text-gray-900">${pic.name}</h4>
                         <p class="text-sm text-gray-600">${pic.transactionCount} sales transactions</p>
+                        <p class="text-sm text-gray-600">${pic.totalItems} items sold</p>
                     </div>
                     <div class="text-right">
                         <p class="font-semibold text-green-600">${formatCurrency(pic.totalSales)}</p>
                         <p class="text-xs text-gray-500">Total Sales</p>
                         <p class="font-semibold text-blue-600 mt-1">${formatCurrency(pic.commission)}</p>
                         <p class="text-xs text-gray-500">Commission (20%)</p>
+                        <p class="font-semibold text-purple-600 mt-1">${formatCurrency(pic.totalManualPrice)}</p>
+                        <p class="text-xs text-gray-500">Manual Price</p>
                     </div>
                 </div>
             `).join('');
@@ -519,6 +551,15 @@
                             }
                             productSales[productName].quantity += item.quantity;
                             productSales[productName].total += (item.quantity * item.price);
+                        });
+                    }
+                    if (transaction.free_items) {
+                        transaction.free_items.forEach(item => {
+                            const productName = item.name;
+                            if (!productSales[productName]) {
+                                productSales[productName] = { quantity: 0, total: 0 };
+                            }
+                            productSales[productName].quantity += 1;
                         });
                     }
                 });
