@@ -320,26 +320,33 @@
             const salesTransactions = allTransactions.filter(t => t.type === 'penjualan');
             const expenseTransactions = allTransactions.filter(t => t.type === 'pengeluaran');
             
-            // Calculate totals
             const totalSales = salesTransactions.reduce((sum, t) => sum + (Number(t.total) || 0), 0);
             const totalExpenses = expenseTransactions.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
             
-            // Calculate cash breakdown for sales only
-            const cashInHand = salesTransactions
+            const cashSales = salesTransactions
                 .filter(t => t.payment_method === 'CASH')
                 .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
             
-            const cashInBank = salesTransactions
-                .filter(t => t.payment_method === 'TF')
+            const cashExpenses = expenseTransactions
+                .filter(t => t.payment_method === 'CASH')
+                .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+            const tfSales = salesTransactions
+                .filter(t => t.payment_method === 'Mandiri' || t.payment_method === 'TF')
                 .reduce((sum, t) => sum + (Number(t.total) || 0), 0);
+
+            const tfExpenses = expenseTransactions
+                .filter(t => t.payment_method === 'Mandiri' || t.payment_method === 'TF')
+                .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+            const cashInHand = cashSales - cashExpenses;
+            const cashInBank = tfSales - tfExpenses;
             
-            // Update DOM
             document.getElementById('totalSales').textContent = formatCurrency(totalSales);
             document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
             document.getElementById('cashInHand').textContent = formatCurrency(cashInHand);
             document.getElementById('cashInBank').textContent = formatCurrency(cashInBank);
             
-            // Update counts
             document.getElementById('salesCount').textContent = `${salesTransactions.length} transactions`;
             document.getElementById('expensesCount').textContent = `${expenseTransactions.length} transactions`;
         }
