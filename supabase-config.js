@@ -134,17 +134,13 @@ async function deleteAllTransactions() {
     }
 }
 
-// Utility function to get price based on promo type
+// Utility function to get price based on promo type (updated for new structure)
 function getProductPrice(product, promoType) {
     const priceMap = {
         'No Promo': product.price_no_promo,
         'B1G1': product.price_b1g1,
-        'Bundling': product.price_bundling,
-        'Family Set': product.price_family_set,
-        'Random Set': product.price_random_set,
-        'Scrunchie Set': product.price_scrunchie_set,
-        '2pcs Sablon': product.price_2pcs_sablon,
-        'Bulk': product.price_bulk
+        'Family': product.price_random, // Family uses price_random
+        'Random': product.price_random  // Random uses price_random
     };
     
     return priceMap[promoType] || product.price_no_promo;

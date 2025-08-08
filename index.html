@@ -73,231 +73,147 @@
                     </select>
                 </div>
 
+                <!-- Promo Selection (shown only for sales) -->
+                <div id="promoSelection" class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Promo Type</label>
+                    <select id="promoType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-green-50">
+                        <option value="No Promo">No Promo</option>
+                        <option value="B1G1">B1G1</option>
+                        <option value="Bundling">Bundling</option>
+                        <option value="Family">Family</option>
+                        <option value="Random">Random</option>
+                    </select>
+                </div>
+
                 <form id="transactionForm" class="space-y-4">
-                    <!-- Sales Form -->
-                    <div id="salesForm">
-                        <div class="space-y-4">
-                            <input type="date" id="salesDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            
-                            <select id="salesProduct" name="product" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select Product</option>
-                                <!-- Products will be loaded from Supabase -->
-                            </select>
-
-                            <!-- Product Color and Size -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="searchable-dropdown">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                                    <input type="text" id="productColor" name="color" placeholder="Type or select color" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <div class="dropdown-options" id="colorDropdown">
-                                        <div class="dropdown-option" data-value="Black">Black</div>
-                                        <div class="dropdown-option" data-value="White">White</div>
-                                        <div class="dropdown-option" data-value="Navy Blue">Navy Blue</div>
-                                        <div class="dropdown-option" data-value="Sky Blue">Sky Blue</div>
-                                        <div class="dropdown-option" data-value="Midnight Blue">Midnight Blue</div>
-                                        <div class="dropdown-option" data-value="Royal Blue">Royal Blue</div>
-                                        <div class="dropdown-option" data-value="Red">Red</div>
-                                        <div class="dropdown-option" data-value="Maroon">Maroon</div>
-                                        <div class="dropdown-option" data-value="Dark Red">Dark Red</div>
-                                        <div class="dropdown-option" data-value="Green">Green</div>
-                                        <div class="dropdown-option" data-value="Forest Green">Forest Green</div>
-                                        <div class="dropdown-option" data-value="Olive Green">Olive Green</div>
-                                        <div class="dropdown-option" data-value="Yellow">Yellow</div>
-                                        <div class="dropdown-option" data-value="Orange">Orange</div>
-                                        <div class="dropdown-option" data-value="Purple">Purple</div>
-                                        <div class="dropdown-option" data-value="Pink">Pink</div>
-                                        <div class="dropdown-option" data-value="Gray">Gray</div>
-                                        <div class="dropdown-option" data-value="Light Gray">Light Gray</div>
-                                        <div class="dropdown-option" data-value="Dark Gray">Dark Gray</div>
-                                        <div class="dropdown-option" data-value="Brown">Brown</div>
-                                        <div class="dropdown-option" data-value="Cream">Cream</div>
-                                        <div class="dropdown-option" data-value="Beige">Beige</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="searchable-dropdown">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Size</label>
-                                    <input type="text" id="productSize" name="size" placeholder="Type or select size" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <div class="dropdown-options" id="sizeDropdown">
-                                        <div class="dropdown-option" data-value="XS">XS</div>
-                                        <div class="dropdown-option" data-value="S">S</div>
-                                        <div class="dropdown-option" data-value="M">M</div>
-                                        <div class="dropdown-option" data-value="L">L</div>
-                                        <div class="dropdown-option" data-value="XL">XL</div>
-                                        <div class="dropdown-option" data-value="XXL">XXL</div>
-                                        <div class="dropdown-option" data-value="XXXL">XXXL</div>
-                                        <div class="dropdown-option" data-value="All Size">All Size</div>
-                                        <div class="dropdown-option" data-value="Kids S">Kids S</div>
-                                        <div class="dropdown-option" data-value="Kids M">Kids M</div>
-                                        <div class="dropdown-option" data-value="Kids L">Kids L</div>
-                                        <div class="dropdown-option" data-value="Kids XL">Kids XL</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <select id="salesPromo" name="promo_type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select Promo</option>
-                                <option value="No Promo">No Promo</option>
-                                <option value="B1G1">B1G1</option>
-                                <option value="Bundling">Bundling</option>
-                                <option value="Family Set">Family Set</option>
-                                <option value="Random Set">Random Set</option>
-                                <option value="Scrunchie Set">Scrunchie Set</option>
-                                <option value="2pcs Sablon">2pcs Sablon</option>
-                            </select>
-
-                            <!-- Enhanced Promo Fields -->
-                            <div id="noPromoFields" class="hidden space-y-4">
-                                <input type="number" id="quantitySimple" placeholder="Quantity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <input type="number" id="priceSimple" placeholder="Price per pcs" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-
-                            <div id="promoFields" class="hidden space-y-4">
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                                            <span id="promoQtyLabel">Quantity</span>
-                                        </label>
-                                        <input type="number" id="quantityPromo" placeholder="Quantity" min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                                            <span id="promoPriceLabel">Fixed Price</span>
-                                            <span class="ml-1 text-xs text-gray-500">(editable)</span>
-                                        </label>
-                                        <input type="number" id="pricePromo" placeholder="10000" value="10000" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Price Breakdown Form -->
-                            <div id="priceBreakdown" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-                                <h4 class="font-semibold text-blue-800 text-sm">💰 Price Breakdown</h4>
-                                
-                                <div id="normalBreakdown" class="hidden">
-                                    <div class="flex justify-between items-center text-sm">
-                                        <span class="text-gray-600">Normal Items:</span>
-                                        <div class="text-right">
-                                            <div><span id="normalQtyDisplay">0</span> × Rp <span id="normalPriceDisplay">0</span></div>
-                                            <div class="font-medium">= Rp <span id="normalTotalDisplay">0</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div id="promoBreakdown" class="hidden">
-                                    <div class="flex justify-between items-center text-sm">
-                                        <span class="text-gray-600">Promo Items:</span>
-                                        <div class="text-right">
-                                            <div><span id="promoQtyDisplay">0</span> × Rp <span id="promoPriceDisplay">0</span></div>
-                                            <div class="font-medium text-green-600">= Rp <span id="promoTotalDisplay">0</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="border-t border-blue-300 pt-2">
-                                    <div class="flex justify-between items-center text-sm font-semibold">
-                                        <span class="text-blue-800">Subtotal:</span>
-                                        <span class="text-blue-800">Rp <span id="subtotalDisplay">0</span></span>
-                                    </div>
-                                    <div class="flex justify-between items-center font-bold text-blue-800 border-t border-blue-300 pt-1 mt-1">
-                                        <span>Total:</span>
-                                        <span>Rp <span id="grandTotalDisplay">0</span></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <select id="salesPayment" name="payment_method" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select Payment Method</option>
-                                <option value="CASH">CASH</option>
-                                <option value="Mandiri">Mandiri</option>
-                            </select>
-
-                            <div class="space-y-2">
-                                <select id="salesPIC" name="pic_sales" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Select PIC</option>
-                                    <option value="Ayu">Ayu</option>
-                                    <option value="Fifin">Fifin</option>
-                                    <option value="Lili">Lili</option>
-                                    <option value="Nadira">Nadira</option>
-                                    <option value="Rizka">Rizka</option>
-                                    <option value="custom">➕ Add New PIC</option>
+                    <!-- Form Type 1: No Promo & B1G1 -->
+                    <div id="formType1" class="hidden space-y-4">
+                        <input type="date" id="salesDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        
+                        <!-- Main Item Section -->
+                        <div id="mainItemsContainer" class="space-y-4">
+                            <div class="main-item border border-gray-200 rounded-lg p-4 space-y-3">
+                                <h4 class="font-medium text-gray-800">Item 1</h4>
+                                <select class="item-product w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Product</option>
                                 </select>
-                                <input type="text" id="customSalesPIC" name="custom_pic_sales" placeholder="Enter new PIC name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 hidden">
-                            </div>
-
-                            <!-- Multiple Free Items -->
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between">
-                                    <label class="block text-sm font-medium text-gray-700">Free Items (optional)</label>
-                                    <button type="button" id="addFreeItemBtn" class="text-blue-600 hover:text-blue-700 text-sm">
-                                        ➕ Add Item
-                                    </button>
-                                </div>
-                                <div id="freeItemsContainer" class="space-y-3">
-                                    <div class="free-item-row border border-gray-200 rounded-lg p-3 space-y-2">
-                                        <div class="flex items-center justify-between">
-                                            <span class="text-sm font-medium text-gray-700">Free Item 1</span>
-                                            <button type="button" class="remove-free-item text-red-500 hover:text-red-700 px-2 py-1" onclick="removeFreeItem(this)" style="display: none;">❌</button>
-                                        </div>
-                                        <select id="salesProduct" name="product" class="free-item-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="">Select Product</option>
-                                        </select>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div class="searchable-dropdown">
-                                                <input type="text" class="free-item-color w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
-                                                <div class="dropdown-options free-color-dropdown">
-                                                    <div class="dropdown-option" data-value="Black">Black</div>
-                                                    <div class="dropdown-option" data-value="White">White</div>
-                                                    <div class="dropdown-option" data-value="Navy Blue">Navy Blue</div>
-                                                    <div class="dropdown-option" data-value="Sky Blue">Sky Blue</div>
-                                                    <div class="dropdown-option" data-value="Midnight Blue">Midnight Blue</div>
-                                                    <div class="dropdown-option" data-value="Royal Blue">Royal Blue</div>
-                                                    <div class="dropdown-option" data-value="Red">Red</div>
-                                                    <div class="dropdown-option" data-value="Maroon">Maroon</div>
-                                                    <div class="dropdown-option" data-value="Dark Red">Dark Red</div>
-                                                    <div class="dropdown-option" data-value="Green">Green</div>
-                                                    <div class="dropdown-option" data-value="Forest Green">Forest Green</div>
-                                                    <div class="dropdown-option" data-value="Olive Green">Olive Green</div>
-                                                    <div class="dropdown-option" data-value="Yellow">Yellow</div>
-                                                    <div class="dropdown-option" data-value="Orange">Orange</div>
-                                                    <div class="dropdown-option" data-value="Purple">Purple</div>
-                                                    <div class="dropdown-option" data-value="Pink">Pink</div>
-                                                    <div class="dropdown-option" data-value="Gray">Gray</div>
-                                                    <div class="dropdown-option" data-value="Light Gray">Light Gray</div>
-                                                    <div class="dropdown-option" data-value="Dark Gray">Dark Gray</div>
-                                                    <div class="dropdown-option" data-value="Brown">Brown</div>
-                                                    <div class="dropdown-option" data-value="Cream">Cream</div>
-                                                    <div class="dropdown-option" data-value="Beige">Beige</div>
-                                                </div>
-                                            </div>
-                                            <div class="searchable-dropdown">
-                                                <input type="text" class="free-item-size w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
-                                                <div class="dropdown-options free-size-dropdown">
-                                                    <div class="dropdown-option" data-value="XS">XS</div>
-                                                    <div class="dropdown-option" data-value="S">S</div>
-                                                    <div class="dropdown-option" data-value="M">M</div>
-                                                    <div class="dropdown-option" data-value="L">L</div>
-                                                    <div class="dropdown-option" data-value="XL">XL</div>
-                                                    <div class="dropdown-option" data-value="XXL">XXL</div>
-                                                    <div class="dropdown-option" data-value="XXXL">XXXL</div>
-                                                    <div class="dropdown-option" data-value="All Size">All Size</div>
-                                                    <div class="dropdown-option" data-value="Kids S">Kids S</div>
-                                                    <div class="dropdown-option" data-value="Kids M">Kids M</div>
-                                                    <div class="dropdown-option" data-value="Kids L">Kids L</div>
-                                                    <div class="dropdown-option" data-value="Kids XL">Kids XL</div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="searchable-dropdown">
+                                        <label class="block text-sm text-gray-600 mb-1">Color</label>
+                                        <input type="text" class="item-color w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
+                                        <div class="dropdown-options color-dropdown"></div>
+                                    </div>
+                                    <div class="searchable-dropdown">
+                                        <label class="block text-sm text-gray-600 mb-1">Size</label>
+                                        <input type="text" class="item-size w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
+                                        <div class="dropdown-options size-dropdown"></div>
                                     </div>
                                 </div>
+                                <input type="number" class="item-quantity w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Quantity" min="1">
+                                <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" placeholder="Price (auto)" readonly>
                             </div>
+                        </div>
+                        
+                        <!-- Plus Items Button -->
+                        <button type="button" id="addMainItemBtn" class="w-full py-2 px-4 border-2 border-dashed border-blue-300 text-blue-600 rounded-md hover:border-blue-400 hover:text-blue-700">
+                            ➕ Plus Items
+                        </button>
+                        
+                        <!-- Payment & PIC -->
+                        <select id="salesPayment" name="payment_method" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Payment Method</option>
+                            <option value="CASH">CASH</option>
+                            <option value="Mandiri">Mandiri</option>
+                        </select>
+                        
+                        <select id="salesPIC" name="pic_sales" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select PIC</option>
+                            <option value="Ayu">Ayu</option>
+                            <option value="Fifin">Fifin</option>
+                            <option value="Lili">Lili</option>
+                            <option value="Nadira">Nadira</option>
+                            <option value="Rizka">Rizka</option>
+                        </select>
+                        
+                        <!-- Free Items -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-sm font-medium text-gray-700">Free Items (optional)</label>
+                                <button type="button" id="addFreeItemBtn" class="text-green-600 hover:text-green-700 text-sm">➕ Add Free Item</button>
+                            </div>
+                            <div id="freeItemsContainer" class="space-y-3">
+                                <!-- Free items will be added here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Total Display -->
+                        <div id="totalDisplay" class="bg-blue-50 p-4 rounded-md">
+                            <div class="flex justify-between text-lg font-bold">
+                                <span>Total:</span>
+                                <span id="grandTotal">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
 
-                            <!-- Live Calculation -->
-                            <div id="salesCalculation" class="bg-gray-50 p-4 rounded-md hidden">
-                                <div class="flex justify-between mb-2">
-                                    <span>Total:</span>
-                                    <strong id="salesTotal">Rp 0</strong>
+                    <!-- Form Type 2: Bundling, Family, Random -->
+                    <div id="formType2" class="hidden space-y-4">
+                        <input type="date" id="bundlingDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        
+                        <!-- Bundle Items Container -->
+                        <div id="bundleItemsContainer" class="space-y-4">
+                            <div class="bundle-item border border-gray-200 rounded-lg p-4 space-y-3">
+                                <h4 class="font-medium text-gray-800">Item 1</h4>
+                                <select class="bundle-product w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Product</option>
+                                </select>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="searchable-dropdown">
+                                        <label class="block text-sm text-gray-600 mb-1">Color</label>
+                                        <input type="text" class="bundle-color w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
+                                        <div class="dropdown-options color-dropdown"></div>
+                                    </div>
+                                    <div class="searchable-dropdown">
+                                        <label class="block text-sm text-gray-600 mb-1">Size</label>
+                                        <input type="text" class="bundle-size w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
+                                        <div class="dropdown-options size-dropdown"></div>
+                                    </div>
                                 </div>
+                                <input type="number" class="bundle-quantity w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Quantity" min="1">
+                            </div>
+                        </div>
+                        
+                        <!-- Add Items Button -->
+                        <button type="button" id="addBundleItemBtn" class="w-full py-2 px-4 border-2 border-dashed border-green-300 text-green-600 rounded-md hover:border-green-400 hover:text-green-700">
+                            ➕ Add Items
+                        </button>
+                        
+                        <!-- Manual Price Input -->
+                        <input type="number" id="bundlePrice" name="manual_price" placeholder="Enter Price Manually" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        
+                        <!-- Payment & PIC -->
+                        <select id="bundlePayment" name="payment_method" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Payment Method</option>
+                            <option value="CASH">CASH</option>
+                            <option value="Mandiri">Mandiri</option>
+                        </select>
+                        
+                        <select id="bundlePIC" name="pic_sales" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select PIC</option>
+                            <option value="Ayu">Ayu</option>
+                            <option value="Fifin">Fifin</option>
+                            <option value="Lili">Lili</option>
+                            <option value="Nadira">Nadira</option>
+                            <option value="Rizka">Rizka</option>
+                        </select>
+                        
+                        <!-- Free Items -->
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-sm font-medium text-gray-700">Free Items (optional)</label>
+                                <button type="button" id="addBundleFreeItemBtn" class="text-green-600 hover:text-green-700 text-sm">➕ Add Free Item</button>
+                            </div>
+                            <div id="bundleFreeItemsContainer" class="space-y-3">
+                                <!-- Free items will be added here -->
                             </div>
                         </div>
                     </div>
@@ -426,6 +342,10 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('salesDate').value = today;
             document.getElementById('expenseDate').value = today;
+            document.getElementById('bundlingDate').value = today;
+            
+            // Initialize form on page load
+            toggleTransactionForm();
 
             // Setup event listeners
             setupEventListeners();
@@ -443,118 +363,87 @@
         }
 
         async function loadProducts() {
-            const productSelect = document.getElementById('salesProduct');
-            const freeItemSelects = document.querySelectorAll('.free-item-input');
-            
             products = await getProducts();
+            populateProductDropdowns();
+        }
+        
+        function populateProductDropdowns() {
+            // Form Type 1 product dropdowns
+            const mainProductSelects = document.querySelectorAll('.item-product');
             
-            productSelect.innerHTML = '<option value="">Select Product</option>';
-            products.forEach(product => {
-                const option = document.createElement('option');
-                option.value = product.name;
-                option.textContent = product.name;
-                option.dataset.product = JSON.stringify(product);
-                productSelect.appendChild(option);
-            });
-
-            freeItemSelects.forEach(select => {
+            // Form Type 2 product dropdowns 
+            const bundleProductSelects = document.querySelectorAll('.bundle-product');
+            
+            [...mainProductSelects, ...bundleProductSelects].forEach(select => {
                 select.innerHTML = '<option value="">Select Product</option>';
                 products.forEach(product => {
                     const option = document.createElement('option');
-                    option.value = product.name;
+                    option.value = product.id;
                     option.textContent = product.name;
+                    option.dataset.product = JSON.stringify(product);
                     select.appendChild(option);
                 });
+                
+                // Add change listener for automatic price calculation
+                select.addEventListener('change', handleProductSelection);
             });
         }
 
         async function loadColors() {
-            const colorDropdowns = document.querySelectorAll('#colorDropdown, .free-color-dropdown');
-            const colors = await getColors();
-            
-            colorDropdowns.forEach(dropdown => {
-                dropdown.innerHTML = '';
-                colors.forEach(color => {
-                    const option = document.createElement('div');
-                    option.className = 'dropdown-option';
-                    option.dataset.value = color.name;
-                    option.textContent = color.name;
-                    dropdown.appendChild(option);
-                });
-            });
+            // Colors are now loaded dynamically when items are added
+            return await getColors();
         }
 
         async function loadSizes() {
-            const sizeDropdowns = document.querySelectorAll('#sizeDropdown, .free-size-dropdown');
-            const sizes = await getSizes();
-            
-            sizeDropdowns.forEach(dropdown => {
-                dropdown.innerHTML = '';
-                sizes.forEach(size => {
-                    const option = document.createElement('div');
-                    option.className = 'dropdown-option';
-                    option.dataset.value = size.name;
-                    option.textContent = size.name;
-                    dropdown.appendChild(option);
-                });
-            });
+            // Sizes are now loaded dynamically when items are added
+            return await getSizes();
         }
 
         function setupEventListeners() {
             // Transaction type switcher
             document.getElementById('transactionType').addEventListener('change', toggleTransactionForm);
             
+            // Promo type switcher (NEW)
+            document.getElementById('promoType').addEventListener('change', handlePromoTypeChange);
+            
             // Form submission
             document.getElementById('transactionForm').addEventListener('submit', handleFormSubmit);
             
-            // Promo type handler
-            document.getElementById('salesPromo').addEventListener('change', handlePromoTypeChange);
+            // Plus Items button for Form Type 1
+            document.getElementById('addMainItemBtn').addEventListener('click', addMainItem);
             
-            // Sales calculation - all quantity/price fields
-            document.getElementById('quantitySimple').addEventListener('input', calculateSalesTotal);
-            document.getElementById('priceSimple').addEventListener('input', calculateSalesTotal);
-            document.getElementById('quantityPromo').addEventListener('input', calculateSalesTotal);
-            document.getElementById('pricePromo').addEventListener('input', calculateSalesTotal);
+            // Add Items button for Form Type 2
+            document.getElementById('addBundleItemBtn').addEventListener('click', addBundleItem);
             
-            // Custom PIC handler
-            document.getElementById('salesPIC').addEventListener('change', handlePICSelection);
-            
-            
-            
-            // Free items handler
-            document.getElementById('addFreeItemBtn').addEventListener('click', addFreeItem);
+            // Free items handlers for both forms
+            document.getElementById('addFreeItemBtn').addEventListener('click', () => addFreeItem('freeItemsContainer'));
+            document.getElementById('addBundleFreeItemBtn').addEventListener('click', () => addFreeItem('bundleFreeItemsContainer'));
             
             // Recent transaction filters
             document.getElementById('applyRecentFilters').addEventListener('click', applyRecentFilters);
             document.getElementById('resetRecentFilters').addEventListener('click', resetRecentFilters);
-            
-            // Product selection handler for auto-fill price
-            document.getElementById('salesProduct').addEventListener('change', handleProductSelection);
         }
 
-        function handlePICSelection() {
-            const picSelect = document.getElementById('salesPIC');
-            const customPICInput = document.getElementById('customSalesPIC');
-            
-            if (picSelect.value === 'custom') {
-                customPICInput.classList.remove('hidden');
-                customPICInput.focus();
-            } else {
-                customPICInput.classList.add('hidden');
-                customPICInput.value = '';
-            }
-        }
 
         function toggleTransactionForm() {
             const type = document.getElementById('transactionType').value;
-            const salesForm = document.getElementById('salesForm');
+            const promoSelection = document.getElementById('promoSelection');
+            const formType1 = document.getElementById('formType1');
+            const formType2 = document.getElementById('formType2');
             const expenseForm = document.getElementById('expenseForm');
             
             if (type === 'penjualan') {
-                salesForm.classList.remove('hidden');
+                promoSelection.classList.remove('hidden');
                 expenseForm.classList.add('hidden');
+                // Reset form visibility
+                formType1.classList.add('hidden');
+                formType2.classList.add('hidden');
+                // Trigger promo type change to show appropriate form
+                handlePromoTypeChange();
             } else {
-                salesForm.classList.add('hidden');
+                promoSelection.classList.add('hidden');
+                formType1.classList.add('hidden');
+                formType2.classList.add('hidden');
                 expenseForm.classList.remove('hidden');
             }
         }
@@ -585,61 +474,25 @@
             }
         }
 
-        function addFreeItem() {
-            const container = document.getElementById('freeItemsContainer');
+        function addFreeItem(containerId) {
+            const container = document.getElementById(containerId);
             const currentItems = container.querySelectorAll('.free-item-row').length;
             const newItemDiv = document.createElement('div');
             newItemDiv.className = 'free-item-row border border-gray-200 rounded-lg p-3 space-y-2';
             newItemDiv.innerHTML = `
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-medium text-gray-700">Free Item ${currentItems + 1}</span>
-                    <button type="button" class="remove-free-item text-red-500 hover:text-red-700 px-2 py-1" onclick="removeFreeItem(this)">❌</button>
+                    ${currentItems > 0 ? '<button type="button" class="remove-free-item text-red-500 hover:text-red-700 px-2 py-1" onclick="removeFreeItem(this)">❌</button>' : ''}
                 </div>
                 <input type="text" class="free-item-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Item name">
                 <div class="grid grid-cols-2 gap-2">
                     <div class="searchable-dropdown">
                         <input type="text" class="free-item-color w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
-                        <div class="dropdown-options free-color-dropdown">
-                            <div class="dropdown-option" data-value="Black">Black</div>
-                            <div class="dropdown-option" data-value="White">White</div>
-                            <div class="dropdown-option" data-value="Navy Blue">Navy Blue</div>
-                            <div class="dropdown-option" data-value="Sky Blue">Sky Blue</div>
-                            <div class="dropdown-option" data-value="Midnight Blue">Midnight Blue</div>
-                            <div class="dropdown-option" data-value="Royal Blue">Royal Blue</div>
-                            <div class="dropdown-option" data-value="Red">Red</div>
-                            <div class="dropdown-option" data-value="Maroon">Maroon</div>
-                            <div class="dropdown-option" data-value="Dark Red">Dark Red</div>
-                            <div class="dropdown-option" data-value="Green">Green</div>
-                            <div class="dropdown-option" data-value="Forest Green">Forest Green</div>
-                            <div class="dropdown-option" data-value="Olive Green">Olive Green</div>
-                            <div class="dropdown-option" data-value="Yellow">Yellow</div>
-                            <div class="dropdown-option" data-value="Orange">Orange</div>
-                            <div class="dropdown-option" data-value="Purple">Purple</div>
-                            <div class="dropdown-option" data-value="Pink">Pink</div>
-                            <div class="dropdown-option" data-value="Gray">Gray</div>
-                            <div class="dropdown-option" data-value="Light Gray">Light Gray</div>
-                            <div class="dropdown-option" data-value="Dark Gray">Dark Gray</div>
-                            <div class="dropdown-option" data-value="Brown">Brown</div>
-                            <div class="dropdown-option" data-value="Cream">Cream</div>
-                            <div class="dropdown-option" data-value="Beige">Beige</div>
-                        </div>
+                        <div class="dropdown-options free-color-dropdown"></div>
                     </div>
                     <div class="searchable-dropdown">
                         <input type="text" class="free-item-size w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
-                        <div class="dropdown-options free-size-dropdown">
-                            <div class="dropdown-option" data-value="XS">XS</div>
-                            <div class="dropdown-option" data-value="S">S</div>
-                            <div class="dropdown-option" data-value="M">M</div>
-                            <div class="dropdown-option" data-value="L">L</div>
-                            <div class="dropdown-option" data-value="XL">XL</div>
-                            <div class="dropdown-option" data-value="XXL">XXL</div>
-                            <div class="dropdown-option" data-value="XXXL">XXXL</div>
-                            <div class="dropdown-option" data-value="All Size">All Size</div>
-                            <div class="dropdown-option" data-value="Kids S">Kids S</div>
-                            <div class="dropdown-option" data-value="Kids M">Kids M</div>
-                            <div class="dropdown-option" data-value="Kids L">Kids L</div>
-                            <div class="dropdown-option" data-value="Kids XL">Kids XL</div>
-                        </div>
+                        <div class="dropdown-options free-size-dropdown"></div>
                     </div>
                 </div>
             `;
@@ -647,6 +500,9 @@
             
             // Initialize searchable dropdowns for the new item
             initializeSearchableDropdowns(newItemDiv);
+            
+            // Load colors and sizes
+            loadColorsAndSizes(newItemDiv);
             
             // Show remove buttons if more than one item
             if (currentItems >= 1) {
@@ -675,8 +531,11 @@
             }
         }
 
-        function getFreeItemsArray() {
-            const rows = document.querySelectorAll('.free-item-row');
+        function getFreeItemsArray(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return [];
+            
+            const rows = container.querySelectorAll('.free-item-row');
             const items = [];
             rows.forEach(row => {
                 const name = row.querySelector('.free-item-input').value.trim();
@@ -684,10 +543,9 @@
                 const size = row.querySelector('.free-item-size').value.trim();
                 
                 if (name) {
-                    let item = name;
-                    if (color) item += ` (${color}`;
-                    if (size) item += color ? ` - ${size})` : ` (${size})`;
-                    else if (color) item += ')';
+                    let item = { name: name };
+                    if (color) item.color = color;
+                    if (size) item.size = size;
                     items.push(item);
                 }
             });
@@ -768,120 +626,25 @@
         }
 
         function handlePromoTypeChange() {
-            const promoType = document.getElementById('salesPromo').value;
-            const noPromoFields = document.getElementById('noPromoFields');
-            const promoFields = document.getElementById('promoFields');
-            const priceBreakdown = document.getElementById('priceBreakdown');
-            const promoQtyLabel = document.getElementById('promoQtyLabel');
-            const promoPriceLabel = document.getElementById('promoPriceLabel');
-
-            // Hide all fields first
-            noPromoFields.classList.add('hidden');
-            promoFields.classList.add('hidden');
-            priceBreakdown.classList.add('hidden');
-
-            // Clear fields
-            document.getElementById('quantitySimple').value = '';
-            document.getElementById('priceSimple').value = '';
-            document.getElementById('quantityPromo').value = '';
-
-            if (promoType === 'No Promo' || promoType === '') {
-                noPromoFields.classList.remove('hidden');
-                
-                // Auto-fill price from selected product if available
-                const productSelect = document.getElementById('salesProduct');
-                const selectedOption = productSelect.selectedOptions[0];
-                if (selectedOption && selectedOption.dataset.price) {
-                    const priceInput = document.getElementById('priceSimple');
-                    if (priceInput) {
-                        priceInput.value = selectedOption.dataset.price;
-                    }
-                }
-            } else if (['B1G1', 'Bundling', 'Family Set', 'Random Set', 'Scrunchie Set', '2pcs Sablon'].includes(promoType)) {
-                promoFields.classList.remove('hidden');
-                
-                // Auto-fill price from selected product if available, otherwise use default
-                const productSelect = document.getElementById('salesProduct');
-                const selectedOption = productSelect.selectedOptions[0];
-                const price = selectedOption && selectedOption.dataset.price ? selectedOption.dataset.price : '10000';
-                
-                document.getElementById('pricePromo').value = price;
-                document.getElementById('pricePromo').readOnly = false;
-                document.getElementById('pricePromo').classList.remove('bg-gray-100');
-                
-                // Update labels based on promo type
-                promoQtyLabel.textContent = 'Quantity';
-                promoPriceLabel.innerHTML = 'Fixed Price <span class="ml-1 text-xs text-gray-500">(editable)</span>';
-            }
+            const promoType = document.getElementById('promoType').value;
+            const formType1 = document.getElementById('formType1');
+            const formType2 = document.getElementById('formType2');
             
-            calculateSalesTotal();
-        }
-
-        function calculateSalesTotal() {
-            const promoType = document.getElementById('salesPromo').value;
-            let quantity = 0;
-            let total = 0;
-            let price = 0;
-
-            // Get breakdown elements
-            const priceBreakdown = document.getElementById('priceBreakdown');
-            const normalBreakdown = document.getElementById('normalBreakdown');
-            const promoBreakdown = document.getElementById('promoBreakdown');
-
-            if (promoType === 'No Promo' || promoType === '') {
-                quantity = parseInt(document.getElementById('quantitySimple').value) || 0;
-                price = parseInt(document.getElementById('priceSimple').value) || 0;
-                total = quantity * price;
-
-                // Show simple breakdown for No Promo
-                if (quantity > 0 && price > 0) {
-                    priceBreakdown.classList.remove('hidden');
-                    normalBreakdown.classList.remove('hidden');
-                    promoBreakdown.classList.add('hidden');
-
-                    document.getElementById('normalQtyDisplay').textContent = quantity;
-                    document.getElementById('normalPriceDisplay').textContent = price.toLocaleString();
-                    document.getElementById('normalTotalDisplay').textContent = total.toLocaleString();
-                } else {
-                    priceBreakdown.classList.add('hidden');
-                }
-            } else if (['B1G1', 'Bundling', 'Family Set', 'Random Set', 'Scrunchie Set', '2pcs Sablon'].includes(promoType)) {
-                quantity = parseInt(document.getElementById('quantityPromo').value) || 0;
-                price = parseInt(document.getElementById('pricePromo').value) || 10000;
-                total = quantity * price;
-
-                // Show promo breakdown
-                if (quantity > 0) {
-                    priceBreakdown.classList.remove('hidden');
-                    normalBreakdown.classList.add('hidden');
-                    promoBreakdown.classList.remove('hidden');
-
-                    document.getElementById('promoQtyDisplay').textContent = quantity;
-                    document.getElementById('promoPriceDisplay').textContent = price.toLocaleString();
-                    document.getElementById('promoTotalDisplay').textContent = total.toLocaleString();
-                } else {
-                    priceBreakdown.classList.add('hidden');
-                }
-            } else {
-                priceBreakdown.classList.add('hidden');
-            }
-
-            // Update main calculation display
-            document.getElementById('salesTotal').textContent = formatCurrency(total);
-
-            // Update breakdown totals
-            if (!priceBreakdown.classList.contains('hidden')) {
-                document.getElementById('subtotalDisplay').textContent = total.toLocaleString();
-                document.getElementById('grandTotalDisplay').textContent = total.toLocaleString();
-            }
-
-            const calcDiv = document.getElementById('salesCalculation');
-            if (quantity > 0 && price > 0) {
-                calcDiv.classList.remove('hidden');
-            } else {
-                calcDiv.classList.add('hidden');
+            // Hide both forms first
+            formType1.classList.add('hidden');
+            formType2.classList.add('hidden');
+            
+            if (promoType === 'No Promo' || promoType === 'B1G1') {
+                // Show Form Type 1: No Promo & B1G1
+                formType1.classList.remove('hidden');
+                initializeFormType1();
+            } else if (['Bundling', 'Family', 'Random'].includes(promoType)) {
+                // Show Form Type 2: Bundling, Family, Random
+                formType2.classList.remove('hidden');
+                initializeFormType2();
             }
         }
+
 
         async function handleFormSubmit(e) {
             e.preventDefault();
@@ -896,45 +659,42 @@
                 let transactionData;
                 
                 if (type === 'penjualan') {
-                    const promoType = document.getElementById('salesPromo').value;
-                    let quantity = 0;
-                    let price = 0;
-                    let total = 0;
-
-                    if (promoType === 'No Promo' || promoType === '') {
-                        quantity = parseInt(document.getElementById('quantitySimple').value) || 0;
-                        price = parseInt(document.getElementById('priceSimple').value) || 0;
-                        total = quantity * price;
-                    } else {
-                        quantity = parseInt(document.getElementById('quantityPromo').value) || 0;
-                        price = parseInt(document.getElementById('pricePromo').value) || 0;
-                        total = quantity * price;
-                    }
-
-                    let picSales = document.getElementById('salesPIC').value;
-                    if (picSales === 'custom') {
-                        picSales = document.getElementById('customSalesPIC').value;
-                    }
+                    const promoType = document.getElementById('promoType').value;
                     
-                    const productColor = document.getElementById('productColor').value.trim();
-                    const productSize = document.getElementById('productSize').value.trim();
-                    let productName = document.getElementById('salesProduct').value;
-
-                    transactionData = {
-                        type: 'penjualan',
-                        date: document.getElementById('salesDate').value,
-                        product: productName,
-                        color: productColor || null,
-                        size: productSize || null,
-                        promo_type: promoType,
-                        quantity: quantity,
-                        price_per_pcs: price,
-                        total: total,
-                        payment_method: document.getElementById('salesPayment').value,
-                        pic_sales: picSales,
-                        free_item: getFreeItemsArray().join(', ') || null
-                    };
+                    if (promoType === 'No Promo' || promoType === 'B1G1') {
+                        // Form Type 1: Collect multiple items
+                        const items = collectFormType1Items();
+                        const total = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                        
+                        transactionData = {
+                            type: 'penjualan',
+                            date: document.getElementById('salesDate').value,
+                            promo_type: promoType,
+                            items: items,
+                            total: total,
+                            payment_method: document.getElementById('salesPayment').value,
+                            pic_sales: document.getElementById('salesPIC').value,
+                            free_items: getFreeItemsArray('freeItemsContainer') || null
+                        };
+                    } else {
+                        // Form Type 2: Bundling, Family, Random
+                        const bundleItems = collectFormType2Items();
+                        const manualPrice = parseInt(document.getElementById('bundlePrice').value) || 0;
+                        
+                        transactionData = {
+                            type: 'penjualan',
+                            date: document.getElementById('bundlingDate').value,
+                            promo_type: promoType,
+                            items: bundleItems,
+                            manual_price: manualPrice,
+                            total: manualPrice,
+                            payment_method: document.getElementById('bundlePayment').value,
+                            pic_sales: document.getElementById('bundlePIC').value,
+                            free_items: getFreeItemsArray('bundleFreeItemsContainer') || null
+                        };
+                    }
                 } else {
+                    // Expense form unchanged
                     transactionData = {
                         type: 'pengeluaran',
                         date: document.getElementById('expenseDate').value,
@@ -949,12 +709,16 @@
                 const newTransaction = await createTransaction(transactionData);
                 
                 if (newTransaction) {
+                    // Reset form and reload data
                     document.getElementById('transactionForm').reset();
-                    document.getElementById('salesCalculation').classList.add('hidden');
                     
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById('salesDate').value = today;
                     document.getElementById('expenseDate').value = today;
+                    document.getElementById('bundlingDate').value = today;
+                    
+                    // Reset forms to initial state
+                    toggleTransactionForm();
                     
                     await loadAndFilterRecentTransactions();
                     showNotification('Transaction added successfully!', 'success');
@@ -968,6 +732,65 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Submit Transaction';
             }
+        }
+        
+        function collectFormType1Items() {
+            const items = [];
+            const itemElements = document.querySelectorAll('#mainItemsContainer .main-item');
+            
+            itemElements.forEach(itemElement => {
+                const productSelect = itemElement.querySelector('.item-product');
+                const colorInput = itemElement.querySelector('.item-color');
+                const sizeInput = itemElement.querySelector('.item-size');
+                const quantityInput = itemElement.querySelector('.item-quantity');
+                const priceInput = itemElement.querySelector('.item-price');
+                
+                const productId = productSelect.value;
+                const quantity = parseInt(quantityInput.value) || 0;
+                const price = parseInt(priceInput.value) || 0;
+                
+                if (productId && quantity > 0) {
+                    const selectedProduct = products.find(p => p.id == productId);
+                    items.push({
+                        product_id: productId,
+                        product_name: selectedProduct ? selectedProduct.name : '',
+                        color: colorInput.value.trim() || null,
+                        size: sizeInput.value.trim() || null,
+                        quantity: quantity,
+                        price: price
+                    });
+                }
+            });
+            
+            return items;
+        }
+        
+        function collectFormType2Items() {
+            const items = [];
+            const itemElements = document.querySelectorAll('#bundleItemsContainer .bundle-item');
+            
+            itemElements.forEach(itemElement => {
+                const productSelect = itemElement.querySelector('.bundle-product');
+                const colorInput = itemElement.querySelector('.bundle-color');
+                const sizeInput = itemElement.querySelector('.bundle-size');
+                const quantityInput = itemElement.querySelector('.bundle-quantity');
+                
+                const productId = productSelect.value;
+                const quantity = parseInt(quantityInput.value) || 0;
+                
+                if (productId && quantity > 0) {
+                    const selectedProduct = products.find(p => p.id == productId);
+                    items.push({
+                        product_id: productId,
+                        product_name: selectedProduct ? selectedProduct.name : '',
+                        color: colorInput.value.trim() || null,
+                        size: sizeInput.value.trim() || null,
+                        quantity: quantity
+                    });
+                }
+            });
+            
+            return items;
         }
 
 
