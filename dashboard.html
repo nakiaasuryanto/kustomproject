@@ -11,7 +11,16 @@
     <script src="supabase-config.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+    <div id="passwordOverlay" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Enter Access Key</h2>
+            <input type="password" id="accessKeyInput" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" placeholder="Access Key">
+            <button id="submitAccessKey" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Submit</button>
+            <p id="keyError" class="text-red-500 text-sm mt-2 hidden">Incorrect key. Please try again.</p>
+        </div>
+    </div>
+
+    <div id="dashboardContent" class="container mx-auto px-4 py-8 hidden">
         <!-- Header -->
         <header class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-800 mb-2">📊 Dashboard Summary</h1>
@@ -194,16 +203,61 @@
     </div>
 
     <script>
+        const CORRECT_KEY = "Nakiacantik"; // Replace with your desired key
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordOverlay = document.getElementById('passwordOverlay');
+            const accessKeyInput = document.getElementById('accessKeyInput');
+            const submitAccessKey = document.getElementById('submitAccessKey');
+            const keyError = document.getElementById('keyError');
+            const dashboardContent = document.getElementById('dashboardContent');
+
+            // Check if already authenticated (e.g., from a previous session)
+            if (sessionStorage.getItem('authenticated') === 'true') {
+                passwordOverlay.classList.add('hidden');
+                dashboardContent.classList.remove('hidden');
+                initializeDashboard();
+            } else {
+                passwordOverlay.classList.remove('hidden');
+                dashboardContent.classList.add('hidden');
+            }
+
+            submitAccessKey.addEventListener('click', function() {
+                if (accessKeyInput.value === CORRECT_KEY) {
+                    sessionStorage.setItem('authenticated', 'true');
+                    passwordOverlay.classList.add('hidden');
+                    dashboardContent.classList.remove('hidden');
+                    initializeDashboard();
+                } else {
+                    keyError.classList.remove('hidden');
+                    accessKeyInput.value = ''; // Clear input on wrong key
+                }
+            });
+
+            accessKeyInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitAccessKey.click();
+                }
+            });
+        });
+
+        function initializeDashboard() {
+            // Original dashboard initialization logic
+            initializeDateFilters();
+            setupEventListeners();
+            fetchDashboardData();
+        }
+
         let allTransactions = [];
         let dailyChart = null;
 
         // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
+        function initializeDashboard() {
             initializeDateFilters();
             setupEventListeners();
             fetchDashboardData();
             // loadProductChart(); // This is now called within fetchDashboardData
-        });
+        }
 
         function initializeDateFilters() {
             const today = new Date();
