@@ -346,8 +346,6 @@
                         <p class="text-xs text-gray-500">Total Sales</p>
                         <p class="font-semibold text-blue-600 mt-1">${formatCurrency(pic.commission)}</p>
                         <p class="text-xs text-gray-500">Commission (20%)</p>
-                        <p class="font-semibold text-purple-600 mt-1">${formatCurrency(pic.totalManualPrice)}</p>
-                        <p class="text-xs text-gray-500">Manual Price</p>
                     </div>
                 </div>
             `).join('');
@@ -655,10 +653,6 @@
                 <div class="bg-green-50 p-4 rounded-lg text-center">
                     <div class="text-green-800 font-semibold">Total Quantity</div>
                     <div class="text-xl font-bold text-green-600">${totalQuantity}</div>
-                </div>
-                <div class="bg-purple-50 p-4 rounded-lg text-center">
-                    <div class="text-purple-800 font-semibold">Total Revenue</div>
-                    <div class="text-xl font-bold text-purple-600">${formatCurrency(totalRevenue)}</div>
                 </div>
             `;
         }

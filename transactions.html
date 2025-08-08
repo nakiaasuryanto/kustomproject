@@ -625,36 +625,87 @@
             const tbody = document.getElementById('transactionTableBody');
             tbody.innerHTML = ''; // Clear existing rows
 
+            if (filteredTransactions.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('emptyState').classList.add('hidden');
+
             filteredTransactions.forEach((transaction, index) => {
                 const isEven = index % 2 === 0;
                 const rowClass = isEven ? 'bg-white' : 'bg-gray-50';
-                const items = transaction.items || [];
-                const numItems = items.length > 0 ? items.length : 1;
 
-                for (let i = 0; i < numItems; i++) {
-                    const item = items[i] || {};
+                if (transaction.type === 'penjualan') {
+                    const allItems = [];
+                    if(transaction.items) {
+                        transaction.items.forEach(item => allItems.push({...item, isFree: false}));
+                    }
+                    if(transaction.free_items) {
+                        transaction.free_items.forEach(item => allItems.push({...item, isFree: true}));
+                    }
+
+                    if (allItems.length > 0) {
+                        allItems.forEach((item, itemIndex) => {
+                            const tr = document.createElement('tr');
+                            tr.className = rowClass;
+                            let itemHtml = '';
+
+                            if (item.isFree) {
+                                itemHtml = `(free) ${item.name} (${item.color || 'N/A'} - ${item.size || 'N/A'})`;
+                            } else {
+                                itemHtml = `${item.product_name || 'N/A'} (${item.color || 'N/A'} - ${item.size || 'N/A'}) - ${item.quantity || 'N/A'}x`;
+                            }
+
+                            if (itemIndex === 0) {
+                                const saleAmount = (Number(transaction.manual_price) > 0) ? Number(transaction.manual_price) : Number(transaction.total) || 0;
+                                tr.innerHTML = `
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${allItems.length}">${formatDate(transaction.date)}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm" rowspan="${allItems.length}">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Sales</span>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm text-gray-900" rowspan="${allItems.length}">${transaction.promo_type || 'N/A'}</td>
+                                    <td class="px-4 py-4 text-sm text-gray-900">${itemHtml}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-green-600" rowspan="${allItems.length}">${formatCurrency(saleAmount)}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${allItems.length}">${transaction.pic_sales || 'N/A'}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm" rowspan="${allItems.length}">${transaction.payment_method || 'N/A'}</td>
+                                `;
+                            } else {
+                                tr.innerHTML = `<td class="px-4 py-4 text-sm text-gray-900">${itemHtml}</td>`;
+                            }
+                            tbody.appendChild(tr);
+                        });
+                    } else { // Sales transaction with no items
+                        const tr = document.createElement('tr');
+                        tr.className = rowClass;
+                        const saleAmount = (Number(transaction.manual_price) > 0) ? Number(transaction.manual_price) : Number(transaction.total) || 0;
+                        tr.innerHTML = `
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(transaction.date)}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm">
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Sales</span>
+                            </td>
+                            <td class="px-4 py-4 text-sm text-gray-900">${transaction.promo_type || 'N/A'}</td>
+                            <td class="px-4 py-4 text-sm text-gray-900">-</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-green-600">${formatCurrency(saleAmount)}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${transaction.pic_sales || 'N/A'}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm">${transaction.payment_method || 'N/A'}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    }
+                } else { // Expense
                     const tr = document.createElement('tr');
                     tr.className = rowClass;
-
-                    if (i === 0) {
-                        // First row of a transaction, spans multiple rows
-                        tr.innerHTML = `
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${numItems}">${formatDate(transaction.date)}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm" rowspan="${numItems}">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${transaction.type === 'penjualan' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                                    ${transaction.type === 'penjualan' ? 'Sales' : 'Expense'}
-                                </span>
-                            </td>
-                            <td class="px-4 py-4 text-sm text-gray-900" rowspan="${numItems}">${transaction.promo_type || transaction.expense_category || 'N/A'}</td>
-                            <td class="px-4 py-4 text-sm text-gray-900">${item.product_name || transaction.description || 'N/A'} (${item.color || 'N/A'} - ${item.size || 'N/A'}) - ${item.quantity || 'N/A'}x</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm font-bold ${transaction.type === 'penjualan' ? 'text-green-600' : 'text-red-600'}" rowspan="${numItems}">${formatCurrency(transaction.total || transaction.amount)}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${numItems}">${transaction.pic_sales || transaction.pic || 'N/A'}</td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm" rowspan="${numItems}">${transaction.payment_method || 'N/A'}</td>
-                        `;
-                    } else {
-                        // Subsequent rows for the same transaction
-                        tr.innerHTML = `<td class="px-4 py-4 text-sm text-gray-900">${item.product_name || 'N/A'} (${item.color || 'N/A'} - ${item.size || 'N/A'}) - ${item.quantity || 'N/A'}x</td>`;
-                    }
+                    tr.innerHTML = `
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${formatDate(transaction.date)}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Expense</span>
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-900">${transaction.expense_category || 'N/A'}</td>
+                        <td class="px-4 py-4 text-sm text-gray-900">${transaction.description || 'N/A'}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-bold text-red-600">${formatCurrency(transaction.amount)}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${transaction.pic || 'N/A'}</td>
+                        <td class="px-4 py-4 whitespace-nowrap text-sm">${transaction.payment_method || 'N/A'}</td>
+                    `;
                     tbody.appendChild(tr);
                 }
             });
