@@ -105,13 +105,21 @@ async function getTransactions(filters = {}) {
 
 async function createTransaction(transactionData) {
     try {
+        // Ensure free_items is an array, or null if empty
+        if (transactionData.free_items && transactionData.free_items.length === 0) {
+            transactionData.free_items = null;
+        }
+
         const { data, error } = await supabase
             .from('transactions')
             .insert([transactionData])
             .select()
             .single();
             
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase error:', error);
+            throw error;
+        }
         return data;
     } catch (error) {
         console.error('Error creating transaction:', error);
@@ -134,13 +142,14 @@ async function deleteAllTransactions() {
     }
 }
 
-// Utility function to get price based on promo type (updated for new structure)
+// Utility function to get price based on promo type
 function getProductPrice(product, promoType) {
     const priceMap = {
         'No Promo': product.price_no_promo,
         'B1G1': product.price_b1g1,
-        'Family': product.price_random, // Family uses price_random
-        'Random': product.price_random  // Random uses price_random
+        'Bundling': product.price_bundling,
+        'Family': product.price_family_set,
+        'Random': product.price_random_set
     };
     
     return priceMap[promoType] || product.price_no_promo;

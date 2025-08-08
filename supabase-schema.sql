@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     payment_method TEXT,
     pic_sales TEXT,
     free_item TEXT,
+    items JSONB,
     
     -- Expense transaction fields
     expense_category TEXT,

@@ -198,9 +198,6 @@
         <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-800">All Transactions</h2>
-                <a href="transactions.html" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
-                    View Detailed Transactions
-                </a>
             </div>
 
             <!-- Filters -->
@@ -238,8 +235,9 @@
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details (Promo)</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Items</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Amount</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">PIC</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
                         </tr>
@@ -787,61 +785,41 @@
 
         function renderTransactionTable() {
             const tbody = document.getElementById('transactionTableBody');
-            
-            if (filteredTransactions.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-                return;
-            }
-            
-            document.getElementById('emptyState').classList.add('hidden');
-            
-            tbody.innerHTML = filteredTransactions.map((transaction, index) => {
+            tbody.innerHTML = ''; // Clear existing rows
+
+            filteredTransactions.forEach((transaction, index) => {
                 const isEven = index % 2 === 0;
                 const rowClass = isEven ? 'bg-white' : 'bg-gray-50';
-                
-                return `
-                    <tr class="${rowClass}">
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                            ${formatDate(transaction.date)}
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                transaction.type === 'penjualan' 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-red-100 text-red-800'
-                            }">
-                                ${transaction.type === 'penjualan' ? 'Sales' : 'Expense'}
-                            </span>
-                        </td>
-                        <td class="px-4 py-4 text-sm text-gray-900">
-                            ${transaction.type === 'penjualan' 
-                                ? `<div class="font-medium">${transaction.product}</div>
-                                   <div class="text-xs text-gray-500">${transaction.promo_type} • ${transaction.quantity}x @ ${formatCurrency(transaction.price_per_pcs)}</div>`
-                                : `<div class="font-medium">${transaction.expense_category}</div>
-                                   <div class="text-xs text-gray-500">${transaction.description}</div>`
-                            }
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm">
-                            ${transaction.type === 'penjualan' 
-                                ? `<div class="font-bold text-green-600">${formatCurrency(transaction.total)}</div>`
-                                : `<div class="font-bold text-red-600">${formatCurrency(transaction.amount)}</div>`
-                            }
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                            ${transaction.type === 'penjualan' ? transaction.pic_sales : (transaction.pic || '-')}
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                transaction.payment_method === 'CASH' 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-blue-100 text-blue-800'
-                            }">
-                                ${transaction.payment_method}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+                const items = transaction.items || [];
+                const numItems = items.length > 0 ? items.length : 1;
+
+                for (let i = 0; i < numItems; i++) {
+                    const item = items[i] || {};
+                    const tr = document.createElement('tr');
+                    tr.className = rowClass;
+
+                    if (i === 0) {
+                        // First row of a transaction, spans multiple rows
+                        tr.innerHTML = `
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${numItems}">${formatDate(transaction.date)}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm" rowspan="${numItems}">
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${transaction.type === 'penjualan' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${transaction.type === 'penjualan' ? 'Sales' : 'Expense'}
+                                </span>
+                            </td>
+                            <td class="px-4 py-4 text-sm text-gray-900" rowspan="${numItems}">${transaction.promo_type || transaction.expense_category || 'N/A'}</td>
+                            <td class="px-4 py-4 text-sm text-gray-900">${item.product_name || transaction.description || 'N/A'} (${item.color || 'N/A'} - ${item.size || 'N/A'}) - ${item.quantity || 'N/A'}x</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-bold ${transaction.type === 'penjualan' ? 'text-green-600' : 'text-red-600'}" rowspan="${numItems}">${formatCurrency(transaction.total || transaction.amount)}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900" rowspan="${numItems}">${transaction.pic_sales || transaction.pic || 'N/A'}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm" rowspan="${numItems}">${transaction.payment_method || 'N/A'}</td>
+                        `;
+                    } else {
+                        // Subsequent rows for the same transaction
+                        tr.innerHTML = `<td class="px-4 py-4 text-sm text-gray-900">${item.product_name || 'N/A'} (${item.color || 'N/A'} - ${item.size || 'N/A'}) - ${item.quantity || 'N/A'}x</td>`;
+                    }
+                    tbody.appendChild(tr);
+                }
+            });
         }
 
         function exportToExcel() {
