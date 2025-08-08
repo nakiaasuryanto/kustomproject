@@ -203,7 +203,6 @@
             setupEventListeners();
             fetchDashboardData();
             // loadProductChart(); // This is now called within fetchDashboardData
-            fetchAllTransactions();
         });
 
         function initializeDateFilters() {
@@ -220,9 +219,6 @@
             document.getElementById('updateChart').addEventListener('click', updateDailyChart);
             document.getElementById('updatePieChart').addEventListener('click', updateProductChart);
             document.getElementById('picMonth').addEventListener('change', updatePICSalesStats);
-            document.getElementById('applyFilters').addEventListener('click', applyFilters);
-            document.getElementById('resetFilters').addEventListener('click', resetFilters);
-            document.getElementById('exportBtn').addEventListener('click', exportToExcel);
         }
 
         async function fetchDashboardData() {
@@ -615,144 +611,7 @@
             `;
         }
 
-        // Transaction table functionality
-        async function fetchAllTransactions() {
-            try {
-                allTransactions = await getTransactions();
-                filteredTransactions = [...allTransactions];
-                renderTransactionTable();
-                populatePICFilter();
-            } catch (error) {
-                console.error('Error fetching transactions:', error);
-            }
-        }
-
-        function populatePICFilter() {
-            const picFilter = document.getElementById('filterPIC');
-            const pics = [...new Set(allTransactions.map(t => 
-                t.type === 'penjualan' ? t.pic_sales : t.pic
-            ).filter(pic => pic))];
-            
-            picFilter.innerHTML = '<option value="">All PIC</option>';
-            pics.forEach(pic => {
-                picFilter.innerHTML += `<option value="${pic}">${pic}</option>`;
-            });
-        }
-
-        function applyFilters() {
-            const typeFilter = document.getElementById('filterType').value;
-            const picFilter = document.getElementById('filterPIC').value;
-            const startDate = document.getElementById('filterStartDate').value;
-            const endDate = document.getElementById('filterEndDate').value;
-            
-            filteredTransactions = allTransactions.filter(transaction => {
-                if (typeFilter && transaction.type !== typeFilter) return false;
-                
-                if (picFilter) {
-                    const pic = transaction.type === 'penjualan' ? transaction.pic_sales : transaction.pic;
-                    if (pic !== picFilter) return false;
-                }
-                
-                if (startDate && transaction.date < startDate) return false;
-                if (endDate && transaction.date > endDate) return false;
-                
-                return true;
-            });
-            
-            renderTransactionTable();
-        }
-
-        function resetFilters() {
-            document.getElementById('filterType').value = '';
-            document.getElementById('filterPIC').value = '';
-            document.getElementById('filterStartDate').value = '';
-            document.getElementById('filterEndDate').value = '';
-            
-            filteredTransactions = [...allTransactions];
-            renderTransactionTable();
-        }
-
-        function renderTransactionTable() {
-            const tbody = document.getElementById('transactionTableBody');
-            
-            if (filteredTransactions.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-                return;
-            }
-            
-            document.getElementById('emptyState').classList.add('hidden');
-            
-            tbody.innerHTML = filteredTransactions.map((transaction, index) => {
-                const isEven = index % 2 === 0;
-                const rowClass = isEven ? 'bg-white' : 'bg-gray-50';
-                
-                return `
-                    <tr class="${rowClass}">
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                            ${formatDate(transaction.date)}
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                transaction.type === 'penjualan' 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-red-100 text-red-800'
-                            }">
-                                ${transaction.type === 'penjualan' ? 'Sales' : 'Expense'}
-                            </span>
-                        </td>
-                        <td class="px-4 py-4 text-sm text-gray-900">
-                            ${transaction.type === 'penjualan' 
-                                ? `<div class="font-medium">${transaction.product}</div>
-                                   <div class="text-xs text-gray-500">${transaction.promo_type} • ${transaction.quantity}x @ ${formatCurrency(transaction.price_per_pcs)}</div>`
-                                : `<div class="font-medium">${transaction.expense_category}</div>
-                                   <div class="text-xs text-gray-500">${transaction.description}</div>`
-                            }
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm">
-                            ${transaction.type === 'penjualan' 
-                                ? `<div class="font-bold text-green-600">${formatCurrency(transaction.total)}</div>`
-                                : `<div class="font-bold text-red-600">${formatCurrency(transaction.amount)}</div>`
-                            }
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                            ${transaction.type === 'penjualan' ? transaction.pic_sales : (transaction.pic || '-')}
-                        </td>
-                        <td class="px-4 py-4 whitespace-nowrap text-sm">
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                transaction.payment_method === 'CASH' 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-blue-100 text-blue-800'
-                            }">
-                                ${transaction.payment_method}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function exportToExcel() {
-            const exportData = filteredTransactions.map(transaction => ({
-                'Date': formatDate(transaction.date),
-                'Type': transaction.type === 'penjualan' ? 'Sales' : 'Expense',
-                'Product/Category': transaction.type === 'penjualan' ? transaction.product : transaction.expense_category,
-                'Description': transaction.type === 'penjualan' ? `${transaction.promo_type} • ${transaction.quantity}x @ ${formatCurrency(transaction.price_per_pcs)}` : transaction.description,
-                'Quantity': transaction.quantity || '-',
-                'Price per pcs': transaction.price_per_pcs ? formatCurrency(transaction.price_per_pcs) : '-',
-                'Total/Amount': transaction.type === 'penjualan' ? formatCurrency(transaction.total) : formatCurrency(transaction.amount),
-                'PIC': transaction.type === 'penjualan' ? transaction.pic_sales : (transaction.pic || '-'),
-                'Payment Method': transaction.payment_method,
-                'Free Item': transaction.free_item || '-'
-            }));
-            
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet(exportData);
-            XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
-            
-            const today = new Date();
-            const filename = `dashboard-transactions-${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}.xlsx`;
-            XLSX.writeFile(wb, filename);
-        }
+        
 
         // Pie chart state functions
         function showPieChartLoading() {
