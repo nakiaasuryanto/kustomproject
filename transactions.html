@@ -99,6 +99,17 @@
         let allTransactions = [];
         let dailyChart = null;
 
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID');
+        }
+
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined) return '-';
+            return `Rp ${amount.toLocaleString()}`;
+        }
+
         // Initialize dashboard
                 document.addEventListener('DOMContentLoaded', function() {
             fetchAllTransactions();
