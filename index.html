@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <style>
         .searchable-dropdown {
             position: relative;
@@ -79,31 +81,7 @@
                             
                             <select id="salesProduct" name="product" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Select Product</option>
-                                <option value="T-shirt Katun PDK" data-price="45000">T-shirt Katun PDK</option>
-                                <option value="Long Sleeve" data-price="65000">Long Sleeve</option>
-                                <option value="Kaos Artwork" data-price="50000">Kaos Artwork</option>
-                                <option value="Kaos Premium 24s" data-price="55000">Kaos Premium 24s</option>
-                                <option value="Kaos Oversized" data-price="60000">Kaos Oversized</option>
-                                <option value="Kaos Rugby" data-price="70000">Kaos Rugby</option>
-                                <option value="Kids T-shirt" data-price="35000">Kids T-shirt</option>
-                                <option value="Henley" data-price="58000">Henley</option>
-                                <option value="Poloshirt" data-price="65000">Poloshirt</option>
-                                <option value="Poloshirt Long Sleeve" data-price="75000">Poloshirt Long Sleeve</option>
-                                <option value="Poloshirt Krah Variasi" data-price="68000">Poloshirt Krah Variasi</option>
-                                <option value="Kemeja Pique PDK" data-price="70000">Kemeja Pique PDK</option>
-                                <option value="Kemeja Pique PJG" data-price="80000">Kemeja Pique PJG</option>
-                                <option value="Kemeja Drill" data-price="85000">Kemeja Drill</option>
-                                <option value="Totebag" data-price="25000">Totebag</option>
-                                <option value="Shopping Bag" data-price="30000">Shopping Bag</option>
-                                <option value="Jaket Varsity" data-price="120000">Jaket Varsity</option>
-                                <option value="Jaket Micro" data-price="100000">Jaket Micro</option>
-                                <option value="Jaket Varsity - Furing" data-price="140000">Jaket Varsity - Furing</option>
-                                <option value="Sweater" data-price="90000">Sweater</option>
-                                <option value="Defect Sale" data-price="20000">Defect Sale</option>
-                                <option value="Kaos Ringer" data-price="48000">Kaos Ringer</option>
-                                <option value="Kaos Krah" data-price="52000">Kaos Krah</option>
-                                <option value="Kaos Baseball" data-price="55000">Kaos Baseball</option>
-                                <option value="Scrunchie" data-price="15000">Scrunchie</option>
+                                <!-- Products will be loaded from Supabase -->
                             </select>
 
                             <!-- Product Color and Size -->
@@ -436,13 +414,14 @@
         // Global variables
         let allTransactions = [];
         let filteredTransactions = [];
+        let products = [];
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
         });
 
-        function initializeApp() {
+        async function initializeApp() {
             // Set today's date as default
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('salesDate').value = today;
@@ -451,12 +430,74 @@
             // Setup event listeners
             setupEventListeners();
             
-            // Load recent transactions with filter capability
-            loadAndFilterRecentTransactions();
+            // Load data from Supabase
+            await Promise.all([
+                loadProducts(),
+                loadColors(),
+                loadSizes(),
+                loadAndFilterRecentTransactions()
+            ]);
             
             // Initialize searchable dropdowns
             initializeSearchableDropdowns();
+        }
+
+        async function loadProducts() {
+            const productSelect = document.getElementById('salesProduct');
+            const freeItemSelects = document.querySelectorAll('.free-item-input');
             
+            products = await getProducts();
+            
+            productSelect.innerHTML = '<option value="">Select Product</option>';
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.name;
+                option.textContent = product.name;
+                option.dataset.product = JSON.stringify(product);
+                productSelect.appendChild(option);
+            });
+
+            freeItemSelects.forEach(select => {
+                select.innerHTML = '<option value="">Select Product</option>';
+                products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.name;
+                    option.textContent = product.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        async function loadColors() {
+            const colorDropdowns = document.querySelectorAll('#colorDropdown, .free-color-dropdown');
+            const colors = await getColors();
+            
+            colorDropdowns.forEach(dropdown => {
+                dropdown.innerHTML = '';
+                colors.forEach(color => {
+                    const option = document.createElement('div');
+                    option.className = 'dropdown-option';
+                    option.dataset.value = color.name;
+                    option.textContent = color.name;
+                    dropdown.appendChild(option);
+                });
+            });
+        }
+
+        async function loadSizes() {
+            const sizeDropdowns = document.querySelectorAll('#sizeDropdown, .free-size-dropdown');
+            const sizes = await getSizes();
+            
+            sizeDropdowns.forEach(dropdown => {
+                dropdown.innerHTML = '';
+                sizes.forEach(size => {
+                    const option = document.createElement('div');
+                    option.className = 'dropdown-option';
+                    option.dataset.value = size.name;
+                    option.textContent = size.name;
+                    dropdown.appendChild(option);
+                });
+            });
         }
 
         function setupEventListeners() {
@@ -522,28 +563,24 @@
         function handleProductSelection() {
             const productSelect = document.getElementById('salesProduct');
             const selectedOption = productSelect.selectedOptions[0];
+            const promoType = document.getElementById('salesPromo').value;
             
-            if (selectedOption && selectedOption.dataset.price) {
-                const price = parseInt(selectedOption.dataset.price);
-                
-                // Auto-fill price based on promo type
-                const promoType = document.getElementById('salesPromo').value;
+            if (selectedOption && selectedOption.dataset.product) {
+                const product = JSON.parse(selectedOption.dataset.product);
+                const price = getProductPrice(product, promoType);
                 
                 if (promoType === 'No Promo' || promoType === '') {
-                    // For No Promo: fill the simple price input
                     const priceInput = document.getElementById('priceSimple');
                     if (priceInput) {
                         priceInput.value = price;
                     }
-                } else if (['B1G1', 'Bundling', 'Family Set', 'Random Set', 'Scrunchie Set', '2pcs Sablon'].includes(promoType)) {
-                    // For promo types: fill the fixed price input, replacing the default 10000
+                } else {
                     const pricePromoInput = document.getElementById('pricePromo');
                     if (pricePromoInput) {
                         pricePromoInput.value = price;
                     }
                 }
                 
-                // Recalculate total
                 calculateSalesTotal();
             }
         }
@@ -852,64 +889,44 @@
             const type = document.getElementById('transactionType').value;
             const submitBtn = document.getElementById('submitBtn');
             
-            // Disable submit button
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
             
             try {
-                let transactionData = { type };
+                let transactionData;
                 
                 if (type === 'penjualan') {
+                    const promoType = document.getElementById('salesPromo').value;
                     let quantity = 0;
-let price = 0;
-let total = 0;
+                    let price = 0;
+                    let total = 0;
 
-const promoType = document.getElementById('salesPromo').value;
+                    if (promoType === 'No Promo' || promoType === '') {
+                        quantity = parseInt(document.getElementById('quantitySimple').value) || 0;
+                        price = parseInt(document.getElementById('priceSimple').value) || 0;
+                        total = quantity * price;
+                    } else {
+                        quantity = parseInt(document.getElementById('quantityPromo').value) || 0;
+                        price = parseInt(document.getElementById('pricePromo').value) || 0;
+                        total = quantity * price;
+                    }
 
-if (promoType === 'No Promo') {
-  quantity = parseInt(document.getElementById('quantitySimple').value);
-  price = parseInt(document.getElementById('priceSimple').value);
-  total = quantity * price;
-} else {
-  const qtyNormal = parseInt(document.getElementById('quantityNormal').value) || 0;
-  const priceNormal = parseInt(document.getElementById('priceNormal').value) || 0;
-  const qtyPromo = parseInt(document.getElementById('quantityPromo').value) || 0;
-  const pricePromo = parseInt(document.getElementById('pricePromo').value) || 0;
-
-  quantity = qtyNormal + qtyPromo;
-  price = Math.floor((priceNormal * qtyNormal + pricePromo * qtyPromo) / (quantity || 1));
-  total = priceNormal * qtyNormal + pricePromo * qtyPromo;
-}
-
-
-                    
-                    // Handle custom PIC input
                     let picSales = document.getElementById('salesPIC').value;
                     if (picSales === 'custom') {
                         picSales = document.getElementById('customSalesPIC').value;
                     }
                     
-                    // Get color and size data
                     const productColor = document.getElementById('productColor').value.trim();
                     const productSize = document.getElementById('productSize').value.trim();
-                    
-                    // Format product with color and size
                     let productName = document.getElementById('salesProduct').value;
-                    if (productColor || productSize) {
-                        productName += ' (';
-                        if (productColor) productName += productColor;
-                        if (productColor && productSize) productName += ' - ';
-                        if (productSize) productName += productSize;
-                        productName += ')';
-                    }
-                    
+
                     transactionData = {
                         type: 'penjualan',
                         date: document.getElementById('salesDate').value,
                         product: productName,
                         color: productColor || null,
                         size: productSize || null,
-                        promo_type: document.getElementById('salesPromo').value,
+                        promo_type: promoType,
                         quantity: quantity,
                         price_per_pcs: price,
                         total: total,
@@ -929,44 +946,28 @@ if (promoType === 'No Promo') {
                     };
                 }
 
-                // Save to local storage
-                saveTransactionLocally(transactionData);
+                const newTransaction = await createTransaction(transactionData);
                 
-                const response = await fetch('http://localhost:3001/api/transactions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(transactionData)
-                });
-                
-                if (response.ok) {
-                    // Reset form
+                if (newTransaction) {
                     document.getElementById('transactionForm').reset();
                     document.getElementById('salesCalculation').classList.add('hidden');
                     
-                    // Set today's date again
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById('salesDate').value = today;
                     document.getElementById('expenseDate').value = today;
                     
-                    // Refresh recent transactions
                     await loadAndFilterRecentTransactions();
-                    
                     showNotification('Transaction added successfully!', 'success');
                 } else {
-                    const error = await response.json();
-                    showNotification(error.error || 'Failed to create transaction', 'error');
+                    showNotification('Failed to create transaction', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showNotification('Network error occurred. Transaction saved locally.', 'error');
-                loadLocalTransactions();
+                showNotification('An error occurred while creating the transaction.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Transaction';
             }
-            
-            // Re-enable submit button
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Transaction';
         }
 
 
@@ -1076,36 +1077,26 @@ if (promoType === 'No Promo') {
         // Recent transaction filter functions
         let allRecentTransactions = [];
 
-        function saveTransactionLocally(transaction) {
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            transactions.push(transaction);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-        }
-
-        function loadLocalTransactions() {
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            allRecentTransactions = transactions;
-            populateRecentPICFilter();
-            applyRecentFilters();
-        }
+        
 
         async function loadAndFilterRecentTransactions() {
             try {
                 showRecentLoading();
                 
-                const response = await fetch('http://localhost:3001/api/transactions');
-                allRecentTransactions = await response.json();
+                const filters = {
+                    type: document.getElementById('recentFilterType').value,
+                    pic: document.getElementById('recentFilterPIC').value,
+                    date: document.getElementById('recentFilterDate').value
+                };
+
+                allRecentTransactions = await getTransactions(filters);
                 
-                // Also populate PIC filter
                 populateRecentPICFilter();
-                
-                // Apply current filters
                 applyRecentFilters();
                 
             } catch (error) {
                 console.error('Error loading recent transactions:', error);
                 showRecentError();
-                loadLocalTransactions();
             }
         }
 

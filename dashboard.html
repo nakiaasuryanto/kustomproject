@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
@@ -294,20 +296,13 @@
 
         async function fetchDashboardData() {
             try {
-                const response = await fetch('http://localhost:3001/api/transactions');
-                if (response.ok) {
-                    allTransactions = await response.json();
-                    
-                    // Hide loading state
-                    document.getElementById('loadingState').style.display = 'none';
-                    
-                    // Update all dashboard components
-                    updateSummaryCards();
-                    updatePICSalesStats();
-                    createDailyChart();
-                } else {
-                    throw new Error('Failed to fetch transactions');
-                }
+                allTransactions = await getTransactions();
+                
+                document.getElementById('loadingState').style.display = 'none';
+                
+                updateSummaryCards();
+                updatePICSalesStats();
+                createDailyChart();
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
                 document.getElementById('loadingState').innerHTML = `
@@ -602,31 +597,23 @@
                 return;
             }
             
-            // Calculate start and end dates from month
             const [year, month] = selectedMonth.split('-');
             const startDate = `${year}-${month}-01`;
-            const endDate = new Date(year, month, 0).toISOString().split('T')[0]; // Last day of month
+            const endDate = new Date(year, month, 0).toISOString().split('T')[0];
             
             try {
                 showPieChartLoading();
                 
-                // Fetch sales data
-                let url = 'http://localhost:3001/api/transactions?type=penjualan';
-                if (startDate) url += `&start=${startDate}`;
-                if (endDate) url += `&end=${endDate}`;
-                
-                const response = await fetch(url);
-                const transactions = await response.json();
+                const transactions = await getTransactions({ type: 'penjualan', startDate, endDate });
                 
                 if (transactions.length === 0) {
                     showPieChartEmpty();
                     return;
                 }
                 
-                // Process data for pie chart
                 const productSales = {};
                 transactions.forEach(transaction => {
-                    const product = transaction.product.split('(')[0].trim(); // Remove color/size info
+                    const product = transaction.product.split('(')[0].trim();
                     if (!productSales[product]) {
                         productSales[product] = {
                             quantity: 0,
@@ -637,15 +624,12 @@
                     productSales[product].total += transaction.total;
                 });
                 
-                // Sort by total sales
                 const sortedProducts = Object.entries(productSales)
                     .sort((a, b) => b[1].total - a[1].total);
                 
-                // Prepare chart data
                 const labels = sortedProducts.map(([product]) => product);
                 const quantities = sortedProducts.map(([, data]) => data.quantity);
                 
-                // Generate colors
                 const colors = [
                     '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
                     '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#36A2EB'
@@ -731,8 +715,7 @@
         // Transaction table functionality
         async function fetchAllTransactions() {
             try {
-                const response = await fetch('http://localhost:3001/api/transactions');
-                allTransactions = await response.json();
+                allTransactions = await getTransactions();
                 filteredTransactions = [...allTransactions];
                 renderTransactionTable();
                 populatePICFilter();
