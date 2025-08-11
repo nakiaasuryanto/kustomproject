@@ -331,8 +331,13 @@
                 .filter(t => t.payment_method === 'Mandiri' || t.payment_method === 'TF')
                 .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
-            const cashInHand = cashSales - cashExpenses;
-            const cashInBank = tfSales - tfExpenses;
+            // Base amounts (starting cash balances)
+            const baseCashInHand = 6962000;  // Rp 6,962,000
+            const baseCashInBank = 11817400; // Rp 11,817,400
+            
+            // Calculate current cash positions including base amounts
+            const cashInHand = baseCashInHand + cashSales - cashExpenses;
+            const cashInBank = baseCashInBank + tfSales - tfExpenses;
 
             document.getElementById('totalSales').textContent = formatCurrency(totalSales);
             document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
