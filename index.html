@@ -113,7 +113,7 @@
                                     </div>
                                 </div>
                                 <input type="number" class="item-quantity w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Quantity" min="1">
-                                <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" placeholder="Price (auto)" readonly>
+                                <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Price (from database)" title="Price loaded from database - you can edit if needed">
                             </div>
                         </div>
                         
@@ -465,6 +465,21 @@
                 
                 if (priceInput) {
                     priceInput.value = price;
+                    // Add visual feedback that price is from database
+                    priceInput.style.backgroundColor = '#f0f9ff'; // Light blue background
+                    priceInput.setAttribute('data-original-price', price);
+                    
+                    // Add listener to detect manual changes
+                    priceInput.addEventListener('input', function() {
+                        if (this.value != this.getAttribute('data-original-price')) {
+                            this.style.backgroundColor = '#fef3c7'; // Light yellow for modified
+                            this.setAttribute('title', 'Price modified from database default');
+                        } else {
+                            this.style.backgroundColor = '#f0f9ff'; // Back to light blue
+                            this.setAttribute('title', 'Price from database');
+                        }
+                    });
+                    
                     calculateTotal();
                 }
                 
@@ -652,11 +667,13 @@
                     bundlePriceInput.readOnly = true;
                     bundlePriceInput.classList.add('bg-gray-100');
                     bundlePriceInput.setAttribute('placeholder', 'Auto-calculated bundling price');
+                    bundlePriceInput.setAttribute('title', 'Automatically calculated: sum of B1G1 prices ÷ 2');
                 } else {
                     // Family and Random use manual entry
                     bundlePriceInput.readOnly = false;
                     bundlePriceInput.classList.remove('bg-gray-100');
                     bundlePriceInput.setAttribute('placeholder', 'Enter Price Manually');
+                    bundlePriceInput.setAttribute('title', 'You can enter any price for ' + promoType);
                     bundlePriceInput.value = '';
                 }
             }
@@ -714,7 +731,7 @@
                     </div>
                 </div>
                 <input type="number" class="item-quantity w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Quantity" min="1">
-                <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" placeholder="Price (auto)" readonly>
+                <input type="number" class="item-price w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Price (from database)" title="Price loaded from database - you can edit if needed">
             `;
             
             container.appendChild(itemDiv);
@@ -736,6 +753,7 @@
             
             productSelect.addEventListener('change', handleProductSelection);
             itemDiv.querySelector('.item-quantity').addEventListener('input', calculateTotal);
+            itemDiv.querySelector('.item-price').addEventListener('input', calculateTotal);
             
             // Initialize searchable dropdowns for this item
             initializeSearchableDropdowns(itemDiv);
@@ -922,9 +940,9 @@
             
             // Update the manual price input with the calculated bundling price
             const bundlePriceInput = document.getElementById('bundlePrice');
-            if (bundlePriceInput) {
+            if (bundlePriceInput && document.getElementById('promoType').value === 'Bundling') {
                 bundlePriceInput.value = bundlingPrice;
-                // Make it readonly to show it's calculated automatically
+                // Keep it readonly for bundling only
                 bundlePriceInput.readOnly = true;
                 bundlePriceInput.classList.add('bg-gray-100');
                 bundlePriceInput.setAttribute('placeholder', 'Auto-calculated bundling price');
