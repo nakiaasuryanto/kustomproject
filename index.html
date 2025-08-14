@@ -664,16 +664,18 @@
                 // Configure price input based on promo type
                 const bundlePriceInput = document.getElementById('bundlePrice');
                 if (promoType === 'Bundling') {
-                    bundlePriceInput.readOnly = true;
-                    bundlePriceInput.classList.add('bg-gray-100');
-                    bundlePriceInput.setAttribute('placeholder', 'Auto-calculated bundling price');
-                    bundlePriceInput.setAttribute('title', 'Automatically calculated: sum of B1G1 prices ÷ 2');
+                    bundlePriceInput.readOnly = false; // Make it editable
+                    bundlePriceInput.classList.remove('bg-gray-100');
+                    bundlePriceInput.setAttribute('placeholder', 'Auto-calculated (editable)');
+                    bundlePriceInput.setAttribute('title', 'Auto-calculated from B1G1 prices ÷ 2, but you can edit it');
+                    bundlePriceInput.style.backgroundColor = '#f0f9ff'; // Light blue for auto-calculated
                 } else {
                     // Family and Random use manual entry
                     bundlePriceInput.readOnly = false;
                     bundlePriceInput.classList.remove('bg-gray-100');
                     bundlePriceInput.setAttribute('placeholder', 'Enter Price Manually');
                     bundlePriceInput.setAttribute('title', 'You can enter any price for ' + promoType);
+                    bundlePriceInput.style.backgroundColor = '#ffffff'; // White for manual
                     bundlePriceInput.value = '';
                 }
             }
@@ -942,10 +944,25 @@
             const bundlePriceInput = document.getElementById('bundlePrice');
             if (bundlePriceInput && document.getElementById('promoType').value === 'Bundling') {
                 bundlePriceInput.value = bundlingPrice;
-                // Keep it readonly for bundling only
-                bundlePriceInput.readOnly = true;
-                bundlePriceInput.classList.add('bg-gray-100');
-                bundlePriceInput.setAttribute('placeholder', 'Auto-calculated bundling price');
+                bundlePriceInput.setAttribute('data-auto-calculated', bundlingPrice);
+                
+                // Visual feedback: blue for auto-calculated, yellow if manually changed
+                bundlePriceInput.style.backgroundColor = '#f0f9ff'; // Light blue
+                
+                // Add listener to detect manual changes (only add once)
+                if (!bundlePriceInput.hasAttribute('data-listener-added')) {
+                    bundlePriceInput.addEventListener('input', function() {
+                        const autoValue = this.getAttribute('data-auto-calculated');
+                        if (this.value != autoValue) {
+                            this.style.backgroundColor = '#fef3c7'; // Light yellow for modified
+                            this.setAttribute('title', 'Price manually modified from auto-calculated value');
+                        } else {
+                            this.style.backgroundColor = '#f0f9ff'; // Back to light blue
+                            this.setAttribute('title', 'Auto-calculated from B1G1 prices ÷ 2');
+                        }
+                    });
+                    bundlePriceInput.setAttribute('data-listener-added', 'true');
+                }
             }
         }
 
