@@ -241,13 +241,6 @@
             });
         });
 
-        function initializeDashboard() {
-            // Original dashboard initialization logic
-            initializeDateFilters();
-            setupEventListeners();
-            fetchDashboardData();
-        }
-
         let allTransactions = [];
         let dailyChart = null;
 
@@ -256,7 +249,6 @@
             initializeDateFilters();
             setupEventListeners();
             fetchDashboardData();
-            // loadProductChart(); // This is now called within fetchDashboardData
         }
 
         function initializeDateFilters() {
