@@ -11,6 +11,8 @@ const PORT = process.env.PORT || 3001;
 // Import routes
 const transactionsRouter = require('./routes/transactions');
 const productsRouter = require('./routes/products');
+const inventoryRouter = require('./routes/inventory');
+const stockRouter = require('./routes/stock');
 
 app.use(cors());
 app.use(express.json());
@@ -35,6 +37,8 @@ app.get('/api/health', (req, res) => {
 // Use routes
 app.use('/api/transactions', transactionsRouter);
 app.use('/api/products', productsRouter);
+app.use('/api/inventory', inventoryRouter);
+app.use('/api/stock', stockRouter);
 
 // Test database connection on startup
 db.execute('SELECT 1')

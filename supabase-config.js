@@ -153,17 +153,6 @@ async function getDashboardSummary() {
     }
 }
 
-async function getDashboardSummary() {
-    try {
-        const { data, error } = await supabase.rpc('get_dashboard_summary');
-        if (error) throw error;
-        return data;
-    } catch (error) {
-        console.error('Error fetching dashboard summary:', error);
-        return null;
-    }
-}
-
 // Utility function to get price based on promo type
 function getProductPrice(product, promoType) {
     const priceMap = {

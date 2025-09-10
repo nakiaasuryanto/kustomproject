@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS sizes (
 -- 4. TRANSACTIONS TABLE (updated to handle multiple items per transaction)
 CREATE TABLE IF NOT EXISTS transactions (
     id BIGSERIAL PRIMARY KEY,
-    type TEXT NOT NULL CHECK (type IN ('penjualan', 'pengeluaran')),
+    type TEXT NOT NULL CHECK (type IN ('penjualan', 'pengeluaran', 'gift')),
     date DATE NOT NULL,
     promo_type TEXT, -- Added at transaction level
     
@@ -51,6 +51,10 @@ CREATE TABLE IF NOT EXISTS transactions (
     description TEXT,
     amount INTEGER,
     pic TEXT,
+    
+    -- Gift transaction fields
+    reason TEXT, -- Reason for gift (e.g., Promo, Sample, Event)
+    recipient TEXT, -- Gift recipient (optional)
     
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

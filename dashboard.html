@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Kustomproject</title>
+    <title>Dasbor - Kustomproject</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -13,24 +13,27 @@
 <body class="bg-gray-100 min-h-screen">
     <div id="passwordOverlay" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
         <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm text-center">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Enter Access Key</h2>
-            <input type="password" id="accessKeyInput" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" placeholder="Access Key">
-            <button id="submitAccessKey" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Submit</button>
-            <p id="keyError" class="text-red-500 text-sm mt-2 hidden">Incorrect key. Please try again.</p>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Masukkan Kunci Akses</h2>
+            <input type="password" id="accessKeyInput" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" placeholder="Kunci Akses">
+            <button id="submitAccessKey" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Kirim</button>
+            <p id="keyError" class="text-red-500 text-sm mt-2 hidden">Kunci salah. Silakan coba lagi.</p>
         </div>
     </div>
 
     <div id="dashboardContent" class="container mx-auto px-4 py-8 hidden">
         <!-- Header -->
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">📊 Dashboard Summary</h1>
-            <p class="text-gray-600 mb-4">Financial Overview & Analytics</p>
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">📊 Ringkasan Dasbor</h1>
+            <p class="text-gray-600 mb-4">Ringkasan Keuangan & Analitik</p>
             <div class="space-x-3">
                 <a href="index.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                    ← Back to Input
+                    ← Kembali ke Input
                 </a>
                 <a href="transactions.html" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
-                    📜 View History
+                    📜 Lihat Riwayat
+                </a>
+                <a href="inventory.html" class="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors">
+                    📥 Inventori
                 </a>
             </div>
         </header>
@@ -95,7 +98,7 @@
             <div class="bg-white p-6 rounded-lg shadow-lg">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-gray-600">Cash in Bank (Mandiri)</p>
+                        <p class="text-sm font-medium text-gray-600">Kas di Bank (Mandiri)</p>
                         <p id="cashInBank" class="text-2xl font-bold text-purple-600">Rp 0</p>
                     </div>
                     <div class="bg-purple-100 p-3 rounded-full">
@@ -105,7 +108,7 @@
                     </div>
                 </div>
                 <div class="mt-2">
-                    <span class="text-xs text-gray-500">Payment: TF</span>
+                    <span class="text-xs text-gray-500">Pembayaran: TF</span>
                 </div>
             </div>
         </div>
@@ -113,19 +116,19 @@
         <!-- Product Sales Distribution (Full Width) -->
         <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Product Sales Distribution</h3>
+                    <h3 class="text-lg font-semibold">Distribusi Penjualan Produk</h3>
                 </div>
                 
                 <!-- Monthly Filter for Chart -->
                 <div class="mb-4 p-4 bg-gray-50 rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
                         <div>
-                            <label class="block text-sm text-gray-600 mb-1">Month</label>
+                            <label class="block text-sm text-gray-600 mb-1">Bulan</label>
                             <input type="month" id="pieChartMonth" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                         <div class="md:col-span-2">
                             <button id="updatePieChart" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors w-full">
-                                Update Chart
+                                Perbarui Grafik
                             </button>
                         </div>
                     </div>
@@ -145,15 +148,15 @@
 
                 <!-- Loading/Error States -->
                 <div id="pieChartLoadingState" class="text-center py-8 hidden">
-                    <div class="text-gray-600">Loading chart data...</div>
+                    <div class="text-gray-600">Memuat data grafik...</div>
                 </div>
 
                 <div id="pieChartErrorState" class="text-center py-8 hidden">
-                    <div class="text-red-600">Error loading chart data. Please try again.</div>
+                    <div class="text-red-600">Error memuat data grafik. Silakan coba lagi.</div>
                 </div>
 
                 <div id="pieChartEmptyState" class="text-center py-8 hidden">
-                    <div class="text-gray-600">No sales data found for the selected period.</div>
+                    <div class="text-gray-600">Tidak ada data penjualan untuk periode yang dipilih.</div>
                 </div>
         </div>
 
@@ -161,17 +164,17 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <!-- Transaction Chart with Date Filter -->
             <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h3 class="text-lg font-semibold mb-4">Transaction Chart by Date</h3>
+                <h3 class="text-lg font-semibold mb-4">Grafik Transaksi berdasarkan Tanggal</h3>
                 
                 <!-- Monthly Filter -->
                 <div class="mb-4 flex gap-3">
                     <div>
-                        <label class="block text-xs text-gray-600 mb-1">Month</label>
+                        <label class="block text-xs text-gray-600 mb-1">Bulan</label>
                         <input type="month" id="chartMonth" class="px-2 py-1 border border-gray-300 rounded text-sm">
                     </div>
                     <div class="flex items-end">
                         <button id="updateChart" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
-                            Update
+                            Perbarui
                         </button>
                     </div>
                 </div>
@@ -181,10 +184,10 @@
 
             <!-- PIC Sales Summary -->
             <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h3 class="text-lg font-semibold mb-4">PIC Sales Summary</h3>
+                <h3 class="text-lg font-semibold mb-4">Ringkasan Penjualan PIC</h3>
                 <div class="mb-4 text-sm text-gray-600">
-                    <p>📊 Sales transactions only</p>
-                    <p>💰 Total transactions by PIC</p>
+                    <p>📊 Hanya transaksi penjualan</p>
+                    <p>💰 Total transaksi per PIC</p>
                 </div>
                 
                 <!-- Monthly Filter -->

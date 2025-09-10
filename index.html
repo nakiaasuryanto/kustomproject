@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kustomproject - Finance Tool</title>
+    <title>Kustomproject - Alat Keuangan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -54,10 +54,13 @@
             <p class="text-gray-600">Internal Finance Management Tool</p>
             <div class="mt-4 space-x-3">
                 <a href="dashboard.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                    📊 Dashboard
+                    📊 Dasbor
                 </a>
                 <a href="transactions.html" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
-                    📜 View History
+                    📜 Lihat Riwayat
+                </a>
+                <a href="inventory.html" class="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors">
+                    📥 Inventori
                 </a>
             </div>
         </header>
@@ -65,14 +68,15 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Form Section (Left) -->
             <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800">Add Transaction</h2>
+                <h2 class="text-2xl font-bold mb-6 text-gray-800">Tambah Transaksi</h2>
                 
-                <!-- Transaction Type Selector -->
+                <!-- Jenis Transaksi Selector -->
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Transaction Type</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Transaksi</label>
                     <select id="transactionType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50">
                         <option value="penjualan">Penjualan (Sales)</option>
                         <option value="pengeluaran">Pengeluaran (Expense)</option>
+                        <option value="gift">Gift (Stock Out)</option>
                     </select>
                 </div>
 
@@ -91,7 +95,7 @@
                 <form id="transactionForm" class="space-y-4">
                     <!-- Form Type 1: No Promo & B1G1 -->
                     <div id="formType1" class="hidden space-y-4">
-                        <input type="date" id="salesDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="date" id="salesTanggal" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         
                         <!-- Main Item Section -->
                         <div id="mainItemsContainer" class="space-y-4">
@@ -160,7 +164,7 @@
 
                     <!-- Form Type 2: Bundling, Family, Random -->
                     <div id="formType2" class="hidden space-y-4">
-                        <input type="date" id="bundlingDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="date" id="bundlingTanggal" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         
                         <!-- Bundle Items Container -->
                         <div id="bundleItemsContainer" class="space-y-4">
@@ -224,7 +228,7 @@
                     <!-- Expense Form -->
                     <div id="expenseForm" class="hidden">
                         <div class="space-y-4">
-                            <input type="date" id="expenseDate" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="date" id="expenseTanggal" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
 
                             <select id="expenseCategory" name="expense_category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Select Category</option>
@@ -254,8 +258,56 @@
                         </div>
                     </div>
 
+                    <!-- Gift Form -->
+                    <div id="giftForm" class="hidden">
+                        <div class="space-y-4">
+                            <input type="date" id="giftTanggal" name="date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                            <!-- Gift Items Container -->
+                            <div id="giftItemsContainer" class="space-y-4">
+                                <div class="gift-item border border-gray-200 rounded-lg p-4 space-y-3">
+                                    <h4 class="font-medium text-gray-800">Gift Item 1</h4>
+                                    <select class="gift-product w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select Product</option>
+                                    </select>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="searchable-dropdown">
+                                            <label class="block text-sm text-gray-600 mb-1">Color</label>
+                                            <input type="text" class="gift-color w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
+                                            <div class="dropdown-options color-dropdown"></div>
+                                        </div>
+                                        <div class="searchable-dropdown">
+                                            <label class="block text-sm text-gray-600 mb-1">Size</label>
+                                            <input type="text" class="gift-size w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
+                                            <div class="dropdown-options size-dropdown"></div>
+                                        </div>
+                                    </div>
+                                    <input type="number" class="gift-quantity w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Quantity" min="1">
+                                </div>
+                            </div>
+                            
+                            <!-- Add Gift Items Button -->
+                            <button type="button" id="addGiftItemBtn" class="w-full py-2 px-4 border-2 border-dashed border-orange-300 text-orange-600 rounded-md hover:border-orange-400 hover:text-orange-700">
+                                🎁 Add Gift Items
+                            </button>
+
+                            <input type="text" id="giftReason" name="reason" placeholder="Reason for Gift (e.g., Promo, Sample, Event)" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                            <select id="giftPIC" name="pic" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select PIC</option>
+                                <option value="Ayu">Ayu</option>
+                                <option value="Fifin">Fifin</option>
+                                <option value="Lili">Lili</option>
+                                <option value="Nadira">Nadira</option>
+                                <option value="Rizka">Rizka</option>
+                            </select>
+
+                            <input type="text" id="giftRecipient" name="recipient" placeholder="Gift Recipient (Optional)" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
                     <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
-                        Submit Transaction
+                        Kirim Transaksi
                     </button>
                 </form>
             </div>
@@ -273,18 +325,19 @@
                             <option value="">All Types</option>
                             <option value="penjualan">Sales</option>
                             <option value="pengeluaran">Expense</option>
+                            <option value="gift">Gift</option>
                         </select>
                         <select id="recentFilterPIC" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">All PIC</option>
                         </select>
-                        <input type="date" id="recentFilterDate" placeholder="Filter by date" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="date" id="recentFilterTanggal" placeholder="Filter by date" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="mt-3 flex gap-2">
                         <button id="applyRecentFilters" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                            Apply Filters
+                            Terapkan Filter
                         </button>
                         <button id="resetRecentFilters" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors">
-                            Reset
+                            Atur Ulang
                         </button>
                     </div>
                 </div>
@@ -294,7 +347,7 @@
                     <table class="min-w-full table-auto">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
@@ -309,11 +362,11 @@
 
                 <!-- Loading/Error States -->
                 <div id="recentLoadingState" class="text-center py-8 hidden">
-                    <div class="text-gray-600">Loading recent transactions...</div>
+                    <div class="text-gray-600">Memuat transaksi terkini...</div>
                 </div>
 
                 <div id="recentErrorState" class="text-center py-8 hidden">
-                    <div class="text-red-600">Error loading recent transactions.</div>
+                    <div class="text-red-600">Error memuat transaksi terkini.</div>
                 </div>
 
                 <div id="recentEmptyState" class="text-center py-8 hidden">
@@ -323,7 +376,7 @@
         </div>
                 <!-- Loading/Error States -->
                 <div id="recentLoadingState" class="text-center py-8 hidden">
-                    <div class="text-gray-600">Loading recent transactions...</div>
+                    <div class="text-gray-600">Memuat transaksi terkini...</div>
                 </div>
             </div>
         </div>
@@ -345,9 +398,10 @@
                 console.log('Initializing app...');
                 // Set today's date as default
                 const today = new Date().toISOString().split('T')[0];
-                document.getElementById('salesDate').value = today;
-                document.getElementById('expenseDate').value = today;
-                document.getElementById('bundlingDate').value = today;
+                document.getElementById('salesTanggal').value = today;
+                document.getElementById('expenseTanggal').value = today;
+                document.getElementById('bundlingTanggal').value = today;
+                document.getElementById('giftTanggal').value = today;
                 
                 // Setup event listeners first
                 setupEventListeners();
@@ -371,18 +425,18 @@
                 console.log('App initialized successfully');
             } catch (error) {
                 console.error('Error initializing app:', error);
-                showNotification('Error loading app. Please refresh the page.', 'error');
+                showNotification('Error memuat aplikasi. Silakan refresh halaman.', 'error');
             }
         }
 
         async function loadProducts() {
             try {
-                console.log('Loading products...');
-                products = await getProducts();
-                console.log('Products loaded:', products.length, 'products');
+                console.log('Loading products from inventory...');
+                products = await getAvailableProducts();
+                console.log('Products loaded from inventory:', products.length, 'products');
                 return products;
             } catch (error) {
-                console.error('Error loading products:', error);
+                console.error('Error loading products from inventory:', error);
                 products = [];
                 return [];
             }
@@ -418,6 +472,9 @@
             document.getElementById('addFreeItemBtn').addEventListener('click', () => addFreeItem('freeItemsContainer'));
             document.getElementById('addBundleFreeItemBtn').addEventListener('click', () => addFreeItem('bundleFreeItemsContainer'));
             
+            // Gift items handler
+            document.getElementById('addGiftItemBtn').addEventListener('click', addGiftItem);
+            
             // Recent transaction filters
             document.getElementById('applyRecentFilters').addEventListener('click', applyRecentFilters);
             document.getElementById('resetRecentFilters').addEventListener('click', resetRecentFilters);
@@ -430,19 +487,29 @@
             const formType1 = document.getElementById('formType1');
             const formType2 = document.getElementById('formType2');
             const expenseForm = document.getElementById('expenseForm');
+            const giftForm = document.getElementById('giftForm');
             
             if (type === 'penjualan') {
                 promoSelection.classList.remove('hidden');
                 expenseForm.classList.add('hidden');
+                giftForm.classList.add('hidden');
                 // Reset form visibility
                 formType1.classList.add('hidden');
                 formType2.classList.add('hidden');
                 // Trigger promo type change to show appropriate form
                 handlePromoTypeChange();
+            } else if (type === 'gift') {
+                promoSelection.classList.add('hidden');
+                formType1.classList.add('hidden');
+                formType2.classList.add('hidden');
+                expenseForm.classList.add('hidden');
+                giftForm.classList.remove('hidden');
+                initializeGiftForm();
             } else {
                 promoSelection.classList.add('hidden');
                 formType1.classList.add('hidden');
                 formType2.classList.add('hidden');
+                giftForm.classList.add('hidden');
                 expenseForm.classList.remove('hidden');
             }
         }
@@ -874,34 +941,230 @@
             }
         }
         
-        async function loadColorsAndSizes(container) {
+        // Gift form functions
+        function initializeGiftForm() {
+            console.log('Initializing Gift Form...');
+            // Clear existing items first
+            const giftContainer = document.getElementById('giftItemsContainer');
+            giftContainer.innerHTML = '';
+            
+            // Add first gift item
+            addGiftItem();
+        }
+        
+        function addGiftItem() {
+            const container = document.getElementById('giftItemsContainer');
+            const itemCount = container.children.length + 1;
+            
+            console.log('Adding gift item', itemCount);
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'gift-item border border-gray-200 rounded-lg p-4 space-y-3';
+            itemDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <h4 class="font-medium text-gray-800">Gift Item ${itemCount}</h4>
+                    ${itemCount > 1 ? '<button type="button" class="remove-gift-item text-red-500 hover:text-red-700" onclick="removeGiftItem(this)">❌</button>' : ''}
+                </div>
+                <select class="gift-product w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select Product</option>
+                </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="searchable-dropdown">
+                        <label class="block text-sm text-gray-600 mb-1">Color</label>
+                        <input type="text" class="gift-color w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Color">
+                        <div class="dropdown-options color-dropdown"></div>
+                    </div>
+                    <div class="searchable-dropdown">
+                        <label class="block text-sm text-gray-600 mb-1">Size</label>
+                        <input type="text" class="gift-size w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Size">
+                        <div class="dropdown-options size-dropdown"></div>
+                    </div>
+                </div>
+                <input type="number" class="gift-quantity w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Quantity" min="1">
+            `;
+            
+            container.appendChild(itemDiv);
+            
+            // Populate product dropdown
+            const productSelect = itemDiv.querySelector('.gift-product');
+            console.log('Populating gift product dropdown with', products.length, 'products');
+            if (products && products.length > 0) {
+                products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.id;
+                    option.textContent = product.name;
+                    option.dataset.product = JSON.stringify(product);
+                    productSelect.appendChild(option);
+                });
+            } else {
+                console.warn('No products available to populate gift dropdown');
+            }
+            
+            // Initialize searchable dropdowns for this item
+            initializeSearchableDropdowns(itemDiv);
+            
+            // Load colors and sizes for dropdowns
+            loadColorsAndSizes(itemDiv);
+        }
+        
+        function removeGiftItem(button) {
+            const container = document.getElementById('giftItemsContainer');
+            const itemDiv = button.closest('.gift-item');
+            itemDiv.remove();
+            
+            // Update item numbers and remove buttons
+            const items = container.children;
+            Array.from(items).forEach((item, index) => {
+                const title = item.querySelector('h4');
+                title.textContent = `Gift Item ${index + 1}`;
+                
+                const removeBtn = item.querySelector('.remove-gift-item');
+                if (index === 0) {
+                    if (removeBtn) removeBtn.remove();
+                } else if (!removeBtn) {
+                    const titleContainer = item.querySelector('.flex');
+                    titleContainer.innerHTML += '<button type="button" class="remove-gift-item text-red-500 hover:text-red-700" onclick="removeGiftItem(this)">❌</button>';
+                }
+            });
+        }
+        
+        function collectGiftItems() {
+            const items = [];
+            const itemElements = document.querySelectorAll('#giftItemsContainer .gift-item');
+            
+            itemElements.forEach(itemElement => {
+                const productSelect = itemElement.querySelector('.gift-product');
+                const colorInput = itemElement.querySelector('.gift-color');
+                const sizeInput = itemElement.querySelector('.gift-size');
+                const quantityInput = itemElement.querySelector('.gift-quantity');
+                
+                const productId = productSelect.value;
+                const quantity = parseInt(quantityInput.value) || 0;
+                
+                if (productId && quantity > 0) {
+                    const selectedProduct = products.find(p => p.id == productId);
+                    items.push({
+                        product_id: productId,
+                        product_name: selectedProduct ? selectedProduct.name : '',
+                        color: colorInput.value.trim() || null,
+                        size: sizeInput.value.trim() || null,
+                        quantity: quantity
+                    });
+                }
+            });
+            
+            return items;
+        }
+        
+        async function loadColorsForProduct(container, productId) {
+            if (!productId) return;
+            
             const colorDropdown = container.querySelector('.color-dropdown');
-            const sizeDropdown = container.querySelector('.size-dropdown');
+            if (!colorDropdown) return;
             
             try {
-                // Load colors
-                const colors = await getColors();
+                console.log('Loading colors for product:', productId);
+                const colors = await getAvailableColors(productId);
                 colorDropdown.innerHTML = '';
+                
+                if (colors.length === 0) {
+                    const noColors = document.createElement('div');
+                    noColors.className = 'dropdown-option text-gray-500';
+                    noColors.textContent = 'No colors available';
+                    colorDropdown.appendChild(noColors);
+                    return;
+                }
+                
                 colors.forEach(color => {
                     const option = document.createElement('div');
                     option.className = 'dropdown-option';
                     option.dataset.value = color.name;
+                    option.dataset.colorId = color.id;
                     option.textContent = color.name;
                     colorDropdown.appendChild(option);
                 });
                 
-                // Load sizes
-                const sizes = await getSizes();
+                console.log('Loaded', colors.length, 'colors for product', productId);
+            } catch (error) {
+                console.error('Error loading colors for product:', error);
+            }
+        }
+
+        async function loadSizesForProductColor(container, productId, colorId) {
+            if (!productId || !colorId) return;
+            
+            const sizeDropdown = container.querySelector('.size-dropdown');
+            if (!sizeDropdown) return;
+            
+            try {
+                console.log('Loading sizes for product:', productId, 'color:', colorId);
+                const sizes = await getAvailableSizes(productId, colorId);
                 sizeDropdown.innerHTML = '';
+                
+                if (sizes.length === 0) {
+                    const noSizes = document.createElement('div');
+                    noSizes.className = 'dropdown-option text-gray-500';
+                    noSizes.textContent = 'No sizes available';
+                    sizeDropdown.appendChild(noSizes);
+                    return;
+                }
+                
                 sizes.forEach(size => {
                     const option = document.createElement('div');
                     option.className = 'dropdown-option';
                     option.dataset.value = size.name;
-                    option.textContent = size.name;
+                    option.dataset.sizeId = size.id;
+                    option.textContent = `${size.name} (${size.total_qty} available)`;
                     sizeDropdown.appendChild(option);
                 });
+                
+                console.log('Loaded', sizes.length, 'sizes for product', productId, 'color', colorId);
             } catch (error) {
-                console.error('Error loading colors and sizes:', error);
+                console.error('Error loading sizes for product+color:', error);
+            }
+        }
+
+        // Legacy function for backward compatibility - now does minimal setup
+        async function loadColorsAndSizes(container) {
+            // This function now only sets up event listeners for dynamic loading
+            setupDynamicDropdownListeners(container);
+        }
+
+        function setupDynamicDropdownListeners(container) {
+            const productSelect = container.querySelector('.item-product, .bundle-product, .gift-product, .free-item-product');
+            const colorInput = container.querySelector('.item-color, .bundle-color, .gift-color, .free-item-color');
+            
+            if (productSelect) {
+                // Load colors when product changes
+                productSelect.addEventListener('change', async (e) => {
+                    const productId = e.target.value;
+                    if (productId) {
+                        await loadColorsForProduct(container, productId);
+                        // Clear size dropdown when product changes
+                        const sizeDropdown = container.querySelector('.size-dropdown');
+                        if (sizeDropdown) sizeDropdown.innerHTML = '';
+                    }
+                });
+            }
+            
+            if (colorInput) {
+                // Load sizes when color changes
+                colorInput.addEventListener('input', async (e) => {
+                    const colorName = e.target.value.trim();
+                    const productSelect = container.querySelector('.item-product, .bundle-product, .gift-product, .free-item-product');
+                    
+                    if (productSelect && productSelect.value && colorName) {
+                        // Find color ID from the dropdown options
+                        const colorDropdown = container.querySelector('.color-dropdown');
+                        const colorOption = Array.from(colorDropdown.children).find(option => 
+                            option.dataset.value === colorName
+                        );
+                        
+                        if (colorOption && colorOption.dataset.colorId) {
+                            await loadSizesForProductColor(container, productSelect.value, colorOption.dataset.colorId);
+                        }
+                    }
+                });
             }
         }
         
@@ -995,7 +1258,7 @@
             const submitBtn = document.getElementById('submitBtn');
             
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            submitBtn.textContent = 'Mengirim...';
             
             try {
                 let transactionData;
@@ -1010,7 +1273,7 @@
                         
                         transactionData = {
                             type: 'penjualan',
-                            date: document.getElementById('salesDate').value,
+                            date: document.getElementById('salesTanggal').value,
                             promo_type: promoType,
                             items: items,
                             total: total,
@@ -1025,7 +1288,7 @@
                         
                         transactionData = {
                             type: 'penjualan',
-                            date: document.getElementById('bundlingDate').value,
+                            date: document.getElementById('bundlingTanggal').value,
                             promo_type: promoType,
                             items: bundleItems,
                             manual_price: manualPrice,
@@ -1035,11 +1298,25 @@
                             free_items: getFreeItemsArray('bundleFreeItemsContainer') || null
                         };
                     }
+                } else if (type === 'gift') {
+                    // Gift form
+                    const giftItems = collectGiftItems();
+                    
+                    transactionData = {
+                        type: 'gift',
+                        date: document.getElementById('giftTanggal').value,
+                        items: giftItems,
+                        reason: document.getElementById('giftReason').value,
+                        pic: document.getElementById('giftPIC').value,
+                        recipient: document.getElementById('giftRecipient').value || null,
+                        total: 0, // No money involved in gifts
+                        payment_method: null // No payment method for gifts
+                    };
                 } else {
                     // Expense form unchanged
                     transactionData = {
                         type: 'pengeluaran',
-                        date: document.getElementById('expenseDate').value,
+                        date: document.getElementById('expenseTanggal').value,
                         expense_category: document.getElementById('expenseCategory').value,
                         description: document.getElementById('expenseDescription').value,
                         amount: parseInt(document.getElementById('expenseAmount').value),
@@ -1055,24 +1332,25 @@
                     document.getElementById('transactionForm').reset();
                     
                     const today = new Date().toISOString().split('T')[0];
-                    document.getElementById('salesDate').value = today;
-                    document.getElementById('expenseDate').value = today;
-                    document.getElementById('bundlingDate').value = today;
+                    document.getElementById('salesTanggal').value = today;
+                    document.getElementById('expenseTanggal').value = today;
+                    document.getElementById('bundlingTanggal').value = today;
+                    document.getElementById('giftTanggal').value = today;
                     
                     // Reset forms to initial state
                     toggleTransactionForm();
                     
                     await loadAndFilterRecentTransactions();
-                    showNotification('Transaction added successfully!', 'success');
+                    showNotification('Transaksi berhasil ditambahkan!', 'success');
                 } else {
-                    showNotification('Failed to create transaction', 'error');
+                    showNotification('Gagal membuat transaksi', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('An error occurred while creating the transaction.', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Transaction';
+                submitBtn.textContent = 'Kirim Transaksi';
             }
         }
         
@@ -1140,7 +1418,7 @@
 
 
         // Utility functions
-        function formatDate(dateString) {
+        function formatTanggal(dateString) {
             const date = new Date(dateString);
             return date.toLocaleDateString('id-ID');
         }
@@ -1187,6 +1465,10 @@
                     const itemCount = transaction.items ? transaction.items.length : 0;
                     detailsHtml = `<div class="font-medium">${itemCount} item(s)</div>
                                    <div class="text-xs text-gray-500">${transaction.promo_type}</div>`;
+                } else if (transaction.type === 'gift') {
+                    const itemCount = transaction.items ? transaction.items.length : 0;
+                    detailsHtml = `<div class="font-medium">${itemCount} gift item(s)</div>
+                                   <div class="text-xs text-gray-500">${transaction.reason || 'Gift'}</div>`;
                 } else {
                     detailsHtml = `<div class="font-medium">${transaction.expense_category}</div>
                                    <div class="text-xs text-gray-500">${transaction.description}</div>`;
@@ -1195,23 +1477,28 @@
                 return `
                     <tr class="${rowClass}">
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                            ${formatDate(transaction.date)}
+                            ${formatTanggal(transaction.date)}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                                 transaction.type === 'penjualan' 
                                     ? 'bg-green-100 text-green-800' 
+                                    : transaction.type === 'gift'
+                                    ? 'bg-orange-100 text-orange-800'
                                     : 'bg-red-100 text-red-800'
                             }">
-                                ${transaction.type === 'penjualan' ? 'Sales' : 'Expense'}
+                                ${transaction.type === 'penjualan' ? 'Sales' : transaction.type === 'gift' ? 'Gift' : 'Expense'}
                             </span>
                         </td>
                         <td class="px-4 py-4 text-sm text-gray-900">
                             ${detailsHtml}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm">
-                            <div class="font-bold ${transaction.type === 'penjualan' ? 'text-green-600' : 'text-red-600'}">
-                                ${formatCurrency(transaction.total || transaction.amount)}
+                            <div class="font-bold ${
+                                transaction.type === 'penjualan' ? 'text-green-600' : 
+                                transaction.type === 'gift' ? 'text-gray-500' : 'text-red-600'
+                            }">
+                                ${transaction.type === 'gift' ? 'Stock Out' : formatCurrency(transaction.total || transaction.amount)}
                             </div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -1255,7 +1542,7 @@
                 const filters = {
                     type: document.getElementById('recentFilterType').value,
                     pic: document.getElementById('recentFilterPIC').value,
-                    date: document.getElementById('recentFilterDate').value
+                    date: document.getElementById('recentFilterTanggal').value
                 };
 
                 allRecentTransactions = await getTransactions(filters);
@@ -1284,7 +1571,7 @@
         function applyRecentFilters() {
             const typeFilter = document.getElementById('recentFilterType').value;
             const picFilter = document.getElementById('recentFilterPIC').value;
-            const dateFilter = document.getElementById('recentFilterDate').value;
+            const dateFilter = document.getElementById('recentFilterTanggal').value;
             
             let filteredTransactions = allRecentTransactions.filter(transaction => {
                 if (typeFilter && transaction.type !== typeFilter) return false;
@@ -1295,8 +1582,8 @@
                 }
                 
                 if (dateFilter) {
-                    const transactionDate = transaction.date.split('T')[0];
-                    if (transactionDate !== dateFilter) return false;
+                    const transactionTanggal = transaction.date.split('T')[0];
+                    if (transactionTanggal !== dateFilter) return false;
                 }
                 
                 return true;
@@ -1317,7 +1604,7 @@
         function resetRecentFilters() {
             document.getElementById('recentFilterType').value = '';
             document.getElementById('recentFilterPIC').value = '';
-            document.getElementById('recentFilterDate').value = '';
+            document.getElementById('recentFilterTanggal').value = '';
             
             // Show recent 10 transactions without filters
             const recentTransactions = allRecentTransactions.slice(0, 10);
@@ -1369,6 +1656,89 @@
                 notification.remove();
             }, 3000);
         }
+
+        // New Inventory-based API Functions
+        async function getAvailableProducts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/inventory/products`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to get products');
+                }
+                
+                // Transform to match expected format
+                return result.data.map(product => ({
+                    id: product.product_id,
+                    name: product.product_name,
+                    // Add default prices - these might need to be loaded from a separate table
+                    price_normal: 0,
+                    price_member: 0, 
+                    price_b1g1: 0,
+                    price_bundling: 0
+                }));
+                
+            } catch (error) {
+                console.error('Error fetching available products:', error);
+                return [];
+            }
+        }
+
+        async function getAvailableColors(productId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/inventory/colors/${productId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to get colors');
+                }
+                
+                return result.data.map(color => ({
+                    id: color.color_id,
+                    name: color.color_name
+                }));
+                
+            } catch (error) {
+                console.error('Error fetching available colors:', error);
+                return [];
+            }
+        }
+
+        async function getAvailableSizes(productId, colorId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/inventory/sizes/${productId}/${colorId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to get sizes');
+                }
+                
+                return result.data.map(size => ({
+                    id: size.size_id,
+                    name: size.size_name,
+                    total_qty: size.total_qty,
+                    locations: size.locations
+                }));
+                
+            } catch (error) {
+                console.error('Error fetching available sizes:', error);
+                return [];
+            }
+        }
+
+        // Define API base URL
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3001' 
+            : '';
     </script>
 </body>
 </html>

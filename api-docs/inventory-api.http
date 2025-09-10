@@ -1,0 +1,314 @@
+# Kustomproject Finance - Inventory & Stock API
+# Collection of HTTP requests for testing the inventory management system
+
+### Variables
+@baseUrl = http://localhost:3001/api
+@authToken = Bearer your-token-here
+
+### Health Check
+GET {{baseUrl}}/../../health
+
+###
+
+# INVENTORY ENDPOINTS
+
+### Get Inventory Tree (All)
+GET {{baseUrl}}/inventory/tree
+
+### Get Inventory Tree (Filtered)
+GET {{baseUrl}}/inventory/tree?product_id=1&color_id=2&only_available=true
+
+### Get Inventory Tree (Search)
+GET {{baseUrl}}/inventory/tree?q=shirt&only_available=true
+
+### Get Inventory Statistics
+GET {{baseUrl}}/inventory/stats
+
+### Get All Locations
+GET {{baseUrl}}/inventory/locations
+
+### Create New Location
+POST {{baseUrl}}/inventory/locations
+Content-Type: application/json
+
+{
+  "code": "WAREHOUSE",
+  "name": "Main Warehouse",
+  "is_default": false
+}
+
+### Search Variants
+GET {{baseUrl}}/inventory/variants/search?q=shirt&limit=10
+
+###
+
+# STOCK MOVEMENT ENDPOINTS
+
+### Get Stock Card
+GET {{baseUrl}}/stock/card?product_id=1&color_id=1&size_id=1&location_id=1&from=2024-01-01&to=2024-12-31&limit=100
+
+### Get Stock Movements (All)
+GET {{baseUrl}}/stock/movements?limit=50
+
+### Get Stock Movements (Filtered)
+GET {{baseUrl}}/stock/movements?variant_id=1&location_id=1&movement_type=IN&limit=20
+
+### Create Stock Movement (IN)
+POST {{baseUrl}}/stock/movements
+Content-Type: application/json
+
+{
+  "product_id": 1,
+  "color_id": 1,
+  "size_id": 1,
+  "location_id": 1,
+  "movement_type": "IN",
+  "reason_code": "OVERPROD_IN",
+  "qty": 10,
+  "unit_cost": 35000,
+  "note": "Initial stock from production",
+  "pic": "Ayu",
+  "created_by": "admin"
+}
+
+### Create Stock Movement (OUT)
+POST {{baseUrl}}/stock/movements
+Content-Type: application/json
+
+{
+  "variant_id": 1,
+  "location_id": 1,
+  "movement_type": "OUT",
+  "reason_code": "SALES_OUT",
+  "qty": 2,
+  "note": "Manual stock adjustment",
+  "pic": "Lili",
+  "created_by": "admin"
+}
+
+### Stock Transfer
+POST {{baseUrl}}/stock/transfer
+Content-Type: application/json
+
+{
+  "product_id": 1,
+  "color_id": 1,
+  "size_id": 1,
+  "from_location_id": 1,
+  "to_location_id": 2,
+  "qty": 5,
+  "ref_code": "TRANSFER-001",
+  "pic": "Nadira",
+  "created_by": "admin",
+  "note": "Moving to display area"
+}
+
+###
+
+# STOCK OPNAME (PHYSICAL COUNT) ENDPOINTS
+
+### Get Stock Opname List
+GET {{baseUrl}}/stock/opname?status=ACTIVE&limit=20
+
+### Start Stock Opname (All Locations)
+POST {{baseUrl}}/stock/opname/start
+Content-Type: application/json
+
+{
+  "opname_code": "OPNAME-2024-001",
+  "created_by": "admin"
+}
+
+### Start Stock Opname (Specific Location)
+POST {{baseUrl}}/stock/opname/start
+Content-Type: application/json
+
+{
+  "opname_code": "OPNAME-DISPLAY-001",
+  "location_id": 1,
+  "created_by": "admin"
+}
+
+### Get Opname Details
+GET {{baseUrl}}/stock/opname/1
+
+### Update Physical Count
+PUT {{baseUrl}}/stock/opname/1/count
+Content-Type: application/json
+
+{
+  "variant_id": 1,
+  "location_id": 1,
+  "counted_qty": 8,
+  "counted_by": "staff-ayu",
+  "note": "Counted during evening shift"
+}
+
+### Commit Stock Opname
+POST {{baseUrl}}/stock/opname/1/commit
+Content-Type: application/json
+
+{
+  "created_by": "admin"
+}
+
+###
+
+# TRANSACTION INTEGRATION ENDPOINTS
+
+### Create Enhanced Sales Transaction (with stock movements)
+POST {{baseUrl}}/transactions/create
+Content-Type: application/json
+
+{
+  "type": "penjualan",
+  "date": "2024-08-25",
+  "promo_type": "No Promo",
+  "items": [
+    {
+      "product_id": 1,
+      "product_name": "T-shirt Katun PDK",
+      "color_id": 1,
+      "color": "Black",
+      "size_id": 1,
+      "size": "M",
+      "quantity": 2,
+      "price": 45000
+    }
+  ],
+  "free_items": [
+    {
+      "product_id": 2,
+      "product_name": "Sticker Pack",
+      "name": "Sticker Pack"
+    }
+  ],
+  "total": 90000,
+  "payment_method": "CASH",
+  "pic_sales": "Fifin"
+}
+
+### Create Gift Transaction (with stock movements)
+POST {{baseUrl}}/transactions/create
+Content-Type: application/json
+
+{
+  "type": "gift",
+  "date": "2024-08-25",
+  "items": [
+    {
+      "product_id": 1,
+      "product_name": "T-shirt Katun PDK",
+      "color_id": 1,
+      "color": "Black", 
+      "size_id": 2,
+      "size": "L",
+      "quantity": 1
+    }
+  ],
+  "reason": "Promotional sample for influencer",
+  "recipient": "Social Media Influencer",
+  "pic": "Rizka"
+}
+
+### Create Expense Transaction (no stock movement)
+POST {{baseUrl}}/transactions/create
+Content-Type: application/json
+
+{
+  "type": "pengeluaran",
+  "date": "2024-08-25",
+  "expense_category": "Transport",
+  "description": "Delivery to customer",
+  "amount": 25000,
+  "payment_method": "CASH",
+  "pic": "Nadira"
+}
+
+###
+
+# EXAMPLE ERROR RESPONSES
+
+### Invalid Stock Movement (Insufficient Stock)
+POST {{baseUrl}}/stock/movements
+Content-Type: application/json
+
+{
+  "variant_id": 1,
+  "location_id": 1,
+  "movement_type": "OUT",
+  "reason_code": "SALES_OUT",
+  "qty": 999,
+  "pic": "test"
+}
+
+### Invalid Transfer (Same Location)
+POST {{baseUrl}}/stock/transfer
+Content-Type: application/json
+
+{
+  "variant_id": 1,
+  "from_location_id": 1,
+  "to_location_id": 1,
+  "qty": 1,
+  "pic": "test"
+}
+
+###
+
+# BULK OPERATIONS
+
+### Bulk Stock Adjustment (Multiple Movements)
+# Note: This would require multiple individual requests
+# or a custom bulk endpoint implementation
+
+POST {{baseUrl}}/stock/movements
+Content-Type: application/json
+
+{
+  "product_id": 1,
+  "color_id": 1,
+  "size_id": 1,
+  "location_id": 1,
+  "movement_type": "IN",
+  "reason_code": "ADJUSTMENT_IN",
+  "qty": 50,
+  "note": "Initial stock setup - T-shirt Black M",
+  "pic": "admin"
+}
+
+###
+
+POST {{baseUrl}}/stock/movements
+Content-Type: application/json
+
+{
+  "product_id": 1,
+  "color_id": 1,
+  "size_id": 2,
+  "location_id": 1,
+  "movement_type": "IN",
+  "reason_code": "ADJUSTMENT_IN",
+  "qty": 30,
+  "note": "Initial stock setup - T-shirt Black L",
+  "pic": "admin"
+}
+
+###
+
+POST {{baseUrl}}/stock/movements
+Content-Type: application/json
+
+{
+  "product_id": 1,
+  "color_id": 1,
+  "size_id": 3,
+  "location_id": 1,
+  "movement_type": "IN",
+  "reason_code": "ADJUSTMENT_IN",
+  "qty": 20,
+  "note": "Initial stock setup - T-shirt Black XL",
+  "pic": "admin"
+}
+
+###
